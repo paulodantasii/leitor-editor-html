@@ -449,10 +449,22 @@ export const TiptapEditor: React.FC = () => {
         const { from, to } = editor.state.selection;
         if (from !== to) {
           const uniqueId = `hl-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
-          editor.chain().focus().setCustomHighlight({ color: 'yellow', id: uniqueId }).run();
 
+          // Apply highlight and advance ProseMirror selection to release WebKit anchor
+          editor
+            .chain()
+            .focus()
+            .setCustomHighlight({ color: 'yellow', id: uniqueId })
+            .setTextSelection(to)
+            .run();
+
+          // Asynchronously release native iOS WebKit selection anchor memory
           setTimeout(() => {
             window.getSelection()?.removeAllRanges();
+            document.getSelection()?.empty();
+            if (document.activeElement instanceof HTMLElement) {
+              document.activeElement.blur();
+            }
           }, 30);
 
           setPopoverPos(null);
