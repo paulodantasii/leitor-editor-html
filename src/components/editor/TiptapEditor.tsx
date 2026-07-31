@@ -427,15 +427,29 @@ export const TiptapEditor: React.FC = () => {
 
   // Handle native selection in Highlight mode & iPad context menu suppression
   useEffect(() => {
-    const handleMouseUpOrTouchEnd = () => {
+    const handleMouseUpOrTouchEnd = (e: MouseEvent | TouchEvent) => {
       if (!editor || !isHighlightMode || isEditable) return;
+
+      const target = e.target as HTMLElement;
+      const markEl = target?.closest('mark');
+
+      // If user tapped on an existing mark, do NOT create a new highlight (allow click listener to open popover)
+      if (markEl) {
+        return;
+      }
 
       const { from, to } = editor.state.selection;
       if (from !== to) {
         // Intercept drag selection and auto apply yellow highlight with unique group ID
         const uniqueId = `hl-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
         editor.chain().focus().setCustomHighlight({ color: 'yellow', id: uniqueId }).run();
-        window.getSelection()?.removeAllRanges();
+
+        // Asynchronously clear native iOS WebKit selection overlay on iPad
+        setTimeout(() => {
+          window.getSelection()?.removeAllRanges();
+          document.getSelection()?.empty();
+        }, 30);
+
         setPopoverPos(null);
         setTargetMarkRange(null);
         setTargetMarkId(null);
