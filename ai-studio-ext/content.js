@@ -185,7 +185,10 @@
       // 2. Remove citações perdidas como texto puro (suportando entidades HTML como &#91; e vírgulas)
       lastOutputHTML = lastOutputHTML.replace(/(\[|&#91;)\s*\d+(\s*,\s*\d+)*\s*(\]|&#93;)/g, '');
       
-      // 3. Remove asteriscos residuais e espaços vazios exagerados
+      // 3. Remove os colchetes vazios "[]" que sobraram porque estavam pro lado de fora do link que foi deletado
+      lastOutputHTML = lastOutputHTML.replace(/(\[|&#91;)\s*(\]|&#93;)/g, '');
+      
+      // 4. Remove asteriscos residuais e espaços vazios exagerados
       lastOutputHTML = lastOutputHTML.replace(/\*\*\*/g, '');
 
       collectedResponses.push({
