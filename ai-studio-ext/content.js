@@ -163,12 +163,29 @@
           }
       }
       
-      // LIMPEZA DO TEXTO:
-      // Remove citações como [1][2][3] geradas pelo Grounding with Google Search
-      lastOutputHTML = lastOutputHTML.replace(/\[\d+\]/g, '');
-      // Remove citações do tipo <a ...>[1]</a> que podem ter ficado
-      lastOutputHTML = lastOutputHTML.replace(/<a[^>]*>\s*\[\d+\]\s*<\/a>/gi, '');
-      // Remove lixos residuais como ***
+      // LIMPEZA DO TEXTO (Avançada):
+      let tempDiv = document.createElement('div');
+      tempDiv.innerHTML = lastOutputHTML;
+      
+      // 1. Remove qualquer link ou superscript (<a> ou <sup>) cujo texto seja apenas um número ou [número]
+      let citationNodes = tempDiv.querySelectorAll('a, sup, span');
+      citationNodes.forEach(node => {
+          let txt = node.textContent.trim();
+          // Bate com "[1]", "1", "[1, 2]", "[ 1 ]", etc.
+          if (/^\[?\s*\d+(\s*,\s*\d+)*\s*\]?$/.test(txt)) {
+              // Se for um link (A) ou sobrescrito (SUP), podemos deletar com segurança
+              if (node.tagName === 'A' || node.tagName === 'SUP') {
+                  node.remove();
+              }
+          }
+      });
+      
+      lastOutputHTML = tempDiv.innerHTML;
+      
+      // 2. Remove citações perdidas como texto puro (suportando entidades HTML como &#91; e vírgulas)
+      lastOutputHTML = lastOutputHTML.replace(/(\[|&#91;)\s*\d+(\s*,\s*\d+)*\s*(\]|&#93;)/g, '');
+      
+      // 3. Remove asteriscos residuais e espaços vazios exagerados
       lastOutputHTML = lastOutputHTML.replace(/\*\*\*/g, '');
 
       collectedResponses.push({
@@ -193,6 +210,11 @@
 `;
     collectedResponses.forEach((item, idx) => {
       finalHtml += "\n<div class=\"generated-part\" id=\"part-" + (idx+1) + "\">\n";
+      
+      // Adiciona o texto exato da pergunta feita pelo usuário, preservando as quebras de linha
+      let promptText = item.prompt.replace(/\n/g, '<br>');
+      finalHtml += "<p><strong>" + promptText + "</strong></p>\n";
+      
       finalHtml += item.responseHTML;
       finalHtml += "\n</div>\n<br>\n";
     });
