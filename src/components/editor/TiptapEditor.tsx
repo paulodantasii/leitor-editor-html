@@ -308,7 +308,7 @@ export const TiptapEditor: React.FC = () => {
             setTargetMarkId(null);
             updateHighlightCount(editor);
           }
-        }, 700); // 700ms gives enough time to adjust handles on iPad
+        }, 500); // 500ms gives enough time to adjust handles on iPad
       }
       // Case B: Cursor is inside a mark (collapsed selection)
       else if (editor.isActive('customHighlight')) {
