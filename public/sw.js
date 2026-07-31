@@ -1,4 +1,4 @@
-const CACHE_NAME = 'leitor-html-v1';
+const CACHE_NAME = 'leitor-html-v2';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
