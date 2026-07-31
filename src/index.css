@@ -1,0 +1,260 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --bg-primary: #f7f7f7;
+    --text-primary: #0f172a;
+    --editor-font: 'Inter', sans-serif;
+    --editor-size: 16px;
+    --editor-width: 80ch;
+  }
+
+  .dark {
+    --bg-primary: #0f172a;
+    --text-primary: #f8fafc;
+  }
+
+  body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: var(--editor-font);
+    font-size: var(--editor-size);
+  }
+}
+
+/* Custom Highlight Mark Styling (Pastel colors) */
+mark {
+  background-color: #fef08a;
+  color: inherit;
+  border-radius: 3px;
+  padding: 0.1em 0;
+  margin: 0;
+  transition: all 0.15s ease-in-out;
+  cursor: pointer;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  display: inline;
+}
+
+/* Synchronized Hover effect for unified highlight blocks */
+mark.mark-hovered,
+mark:hover {
+  filter: brightness(0.92);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+
+.dark mark {
+  color: #0f172a;
+}
+
+/* Highlight Color Variants */
+mark.hl-yellow {
+  background-color: #fef08a;
+}
+
+mark.hl-blue {
+  background-color: #bae6fd;
+}
+
+mark.hl-pink {
+  background-color: #fbcfe8;
+}
+
+mark.hl-green {
+  background-color: #bbf7d0;
+}
+
+mark.hl-purple {
+  background-color: #e9d5ff;
+}
+
+mark.hl-orange {
+  background-color: #fed7aa;
+}
+
+mark.hl-gray {
+  background-color: #cbd5e1;
+}
+
+/* Dark mode adjustment for pastel highlights */
+.dark mark.hl-yellow {
+  background-color: #fef08a;
+  color: #1e293b;
+}
+
+.dark mark.hl-blue {
+  background-color: #7dd3fc;
+  color: #0f172a;
+}
+
+.dark mark.hl-pink {
+  background-color: #f472b6;
+  color: #0f172a;
+}
+
+.dark mark.hl-green {
+  background-color: #86efac;
+  color: #0f172a;
+}
+
+.dark mark.hl-purple {
+  background-color: #d8b4fe;
+  color: #0f172a;
+}
+
+.dark mark.hl-orange {
+  background-color: #fb923c;
+  color: #0f172a;
+}
+
+.dark mark.hl-gray {
+  background-color: #94a3b8;
+  color: #0f172a;
+}
+
+/* Typography options for editor */
+.font-sans-editor {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+.font-serif-editor {
+  font-family: 'Merriweather', Georgia, serif;
+}
+
+/* Tiptap ProseMirror styling */
+.ProseMirror {
+  outline: none !important;
+  min-height: 70vh;
+  line-height: 1.7;
+}
+
+.ProseMirror p {
+  margin-bottom: 1.25em;
+}
+
+.ProseMirror h1 {
+  font-size: 2em;
+  font-weight: 700;
+  margin-top: 1.5em;
+  margin-bottom: 0.75em;
+  border-bottom: 2px solid #e2e8f0;
+  padding-bottom: 0.3em;
+}
+
+.dark .ProseMirror h1 {
+  border-bottom-color: #334155;
+}
+
+.ProseMirror h2 {
+  font-size: 1.5em;
+  font-weight: 600;
+  margin-top: 1.4em;
+  margin-bottom: 0.6em;
+}
+
+.ProseMirror h3 {
+  font-size: 1.25em;
+  font-weight: 600;
+  margin-top: 1.2em;
+  margin-bottom: 0.5em;
+}
+
+.ProseMirror ul,
+.ProseMirror ol {
+  padding-left: 1.5em;
+  margin-bottom: 1.25em;
+}
+
+.ProseMirror ul {
+  list-style-type: disc;
+}
+
+.ProseMirror ol {
+  list-style-type: decimal;
+}
+
+.ProseMirror blockquote {
+  border-left: 4px solid #475569;
+  background-color: #f1f5f9;
+  padding: 0.75em 1.25em;
+  border-radius: 0 4px 4px 0;
+  font-style: italic;
+  margin: 1.5em 0;
+  color: #334155;
+}
+
+.ProseMirror blockquote p {
+  margin-bottom: 0;
+}
+
+.dark .ProseMirror blockquote {
+  border-left-color: #64748b;
+  background-color: #1e293b;
+  color: #cbd5e1;
+}
+
+.ProseMirror img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.5rem;
+  margin: 1.5em auto;
+  display: block;
+}
+
+.ProseMirror table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1.5em 0;
+}
+
+.ProseMirror th,
+.ProseMirror td {
+  border: 1px solid #cbd5e1;
+  padding: 0.5em 0.75em;
+  text-align: left;
+}
+
+.dark .ProseMirror th,
+.dark .ProseMirror td {
+  border-color: #334155;
+}
+
+.ProseMirror th {
+  background-color: #f1f5f9;
+  font-weight: 600;
+}
+
+.dark .ProseMirror th {
+  background-color: #1e293b;
+}
+
+/* iPad / iOS Selection Ergonomics */
+.highlight-mode-active {
+  user-select: text !important;
+  -webkit-user-select: text !important;
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #475569;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}

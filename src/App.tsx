@@ -1,0 +1,72 @@
+import React, { useEffect, useState } from 'react';
+import { Header } from './components/layout/Header';
+import { TiptapEditor } from './components/editor/TiptapEditor';
+import { OneDriveModal } from './components/modals/OneDriveModal';
+import { SettingsModal } from './components/modals/SettingsModal';
+import { WelcomeScreen } from './components/modals/WelcomeScreen';
+import { useAppStore } from './store/useAppStore';
+
+export const App: React.FC = () => {
+  const { preferences } = useAppStore();
+
+  // Show Welcome screen if opening browser from scratch (sessionStorage empty)
+  const [showWelcome, setShowWelcome] = useState<boolean>(() => {
+    const hasSession = sessionStorage.getItem('has_active_session');
+    return !hasSession;
+  });
+
+  // Register PWA Service Worker
+  useEffect(() => {
+    if ('serviceWorker' in navigator && import.meta.env.PROD) {
+      navigator.serviceWorker
+        .register('/sw.js')
+        .then((reg) => console.log('Service Worker registrado com sucesso:', reg.scope))
+        .catch((err) => console.warn('Falha no registro do Service Worker:', err));
+    }
+  }, []);
+
+  // Sync theme class on document element
+  useEffect(() => {
+    if (preferences.theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [preferences.theme]);
+
+  const handleContinueLast = () => {
+    sessionStorage.setItem('has_active_session', 'true');
+    setShowWelcome(false);
+  };
+
+  const handleOpenNew = () => {
+    sessionStorage.setItem('has_active_session', 'true');
+    setShowWelcome(false);
+  };
+
+  return (
+    <div
+      className="min-h-screen flex flex-col transition-colors"
+      style={{ backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }}
+    >
+      <Header />
+
+      <main className="flex-1 flex flex-col items-center">
+        <TiptapEditor />
+      </main>
+
+      {/* Startup Choice Modal (shown when browser opens from scratch) */}
+      {showWelcome && (
+        <WelcomeScreen
+          onContinueLast={handleContinueLast}
+          onOpenNew={handleOpenNew}
+        />
+      )}
+
+      <OneDriveModal />
+      <SettingsModal />
+    </div>
+  );
+};
+
+export default App;
