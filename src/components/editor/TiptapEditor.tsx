@@ -252,10 +252,31 @@ export const TiptapEditor: React.FC = () => {
 
       const { from, to, $from } = editor.state.selection;
 
-      // Case A: User selected a text range manually by dragging mouse
+      // Case A: User selected a text range in Highlight Mode -> APPLY HIGHLIGHT INSTANTLY!
       if (isHighlightMode && !editor.isDestroyed && from !== to) {
-        setTargetMarkRange({ from, to });
+        const uniqueId = `hl-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+
+        // Apply yellow highlight immediately and advance selection to release anchor
+        editor
+          .chain()
+          .focus()
+          .setCustomHighlight({ color: 'yellow', id: uniqueId })
+          .setTextSelection(to)
+          .run();
+
+        // Clear native browser text selection handles immediately
+        setTimeout(() => {
+          window.getSelection()?.removeAllRanges();
+          document.getSelection()?.empty();
+          if (document.activeElement instanceof HTMLElement) {
+            document.activeElement.blur();
+          }
+        }, 20);
+
+        setPopoverPos(null);
+        setTargetMarkRange(null);
         setTargetMarkId(null);
+        updateHighlightCount(editor);
       } 
       // Case B: Cursor is inside a mark (collapsed selection)
       else if (editor.isActive('customHighlight')) {
