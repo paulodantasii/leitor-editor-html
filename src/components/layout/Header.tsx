@@ -16,6 +16,7 @@ import {
   MoreVertical,
   WifiOff,
   Settings,
+  FilePlus,
 } from 'lucide-react';
 
 export const Header: React.FC = () => {
@@ -60,6 +61,22 @@ export const Header: React.FC = () => {
       window.removeEventListener('offline', handleOffline);
     };
   }, [syncStatus, currentDoc.isDirty, setSyncStatus]);
+
+  // Start Blank File
+  const handleNewFile = () => {
+    if (currentDoc.isDirty) {
+      const confirmNew = window.confirm('Você tem alterações não salvas. Deseja iniciar um novo arquivo e descartá-las?');
+      if (!confirmNew) return;
+    }
+    setFileHandle(null);
+    setDocument({
+      title: 'Sem Título',
+      content: '<p></p>',
+      oneDriveItemId: null,
+      lastSavedAt: new Date().toLocaleTimeString(),
+      isDirty: false,
+    });
+  };
 
   // Native Open File with iPad/Mobile Fallback
   const handleOpenFile = async () => {
@@ -267,6 +284,15 @@ export const Header: React.FC = () => {
               onChange={handleFileUploadFallback}
             />
 
+            {/* Botão Novo */}
+            <button
+              onClick={handleNewFile}
+              title="Iniciar novo arquivo em branco"
+              className="px-3 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center gap-1.5 text-xs font-medium transition-colors"
+            >
+              <FilePlus className="w-4 h-4 text-purple-500" /> Novo
+            </button>
+
             {/* Botão Abrir */}
             <button
               onClick={handleOpenFile}
@@ -328,6 +354,15 @@ export const Header: React.FC = () => {
 
             {isMobileMenuOpen && (
               <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 p-2 z-40 space-y-1 animate-in fade-in">
+                <button
+                  onClick={() => {
+                    handleNewFile();
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="w-full p-2 text-left text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg flex items-center gap-2"
+                >
+                  <FilePlus className="w-4 h-4 text-purple-500" /> Novo
+                </button>
                 <button
                   onClick={() => {
                     handleOpenFile();

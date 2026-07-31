@@ -32,6 +32,7 @@ interface AppState {
   document: DocumentState;
   setDocument: (doc: Partial<DocumentState>) => void;
   updateDocumentContent: (content: string) => void;
+  loadCachedDocument: () => void;
 
   // Highlights Counter
   highlightCount: number;
@@ -56,13 +57,27 @@ interface AppState {
 
 const initialPreferences = loadUserPreferences();
 
-const initialDoc: DocumentState = loadLocalDocument() || {
-  title: 'Constituição Federal - Amostra Vade Mecum.html',
-  content: SAMPLE_LEGISLATION_DOC,
-  oneDriveItemId: null,
-  lastSavedAt: null,
-  isDirty: false,
+const getInitialDoc = (): DocumentState => {
+  const hasSession = typeof sessionStorage !== 'undefined' && sessionStorage.getItem('has_active_session');
+  if (hasSession) {
+    return loadLocalDocument() || {
+      title: 'Constituição Federal - Amostra Vade Mecum.html',
+      content: SAMPLE_LEGISLATION_DOC,
+      oneDriveItemId: null,
+      lastSavedAt: null,
+      isDirty: false,
+    };
+  }
+  return {
+    title: 'Novo Documento',
+    content: '<p></p>',
+    oneDriveItemId: null,
+    lastSavedAt: null,
+    isDirty: false,
+  };
 };
+
+const initialDoc: DocumentState = getInitialDoc();
 
 export const useAppStore = create<AppState>((set, get) => ({
   // Preferences
@@ -114,6 +129,16 @@ export const useAppStore = create<AppState>((set, get) => ({
       saveLocalDocument(updated);
       return { document: updated };
     });
+  },
+  loadCachedDocument: () => {
+    const cached = loadLocalDocument() || {
+      title: 'Constituição Federal - Amostra Vade Mecum.html',
+      content: SAMPLE_LEGISLATION_DOC,
+      oneDriveItemId: null,
+      lastSavedAt: null,
+      isDirty: false,
+    };
+    set({ document: cached });
   },
 
   // Highlights Counter

@@ -9,7 +9,7 @@ import { useAppStore } from './store/useAppStore';
 import { ReadingProgress } from './components/layout/ReadingProgress';
 
 export const App: React.FC = () => {
-  const { preferences } = useAppStore();
+  const { preferences, loadCachedDocument } = useAppStore();
 
   // Show Welcome screen if opening browser from scratch (sessionStorage empty)
   const [showWelcome, setShowWelcome] = useState<boolean>(() => {
@@ -38,6 +38,7 @@ export const App: React.FC = () => {
 
   const handleContinueLast = () => {
     sessionStorage.setItem('has_active_session', 'true');
+    loadCachedDocument();
     setShowWelcome(false);
   };
 

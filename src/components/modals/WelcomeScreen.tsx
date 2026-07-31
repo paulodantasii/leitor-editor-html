@@ -1,6 +1,6 @@
 import React from 'react';
 import { useAppStore } from '../../store/useAppStore';
-import { Highlighter, History, FolderOpen, FileText, FilePlus } from 'lucide-react';
+import { Highlighter, History, FolderOpen, FileText, FilePlus, Cloud } from 'lucide-react';
 import { sanitizeHTML } from '../../services/sanitizer';
 
 interface WelcomeScreenProps {
@@ -9,7 +9,7 @@ interface WelcomeScreenProps {
 }
 
 export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onContinueLast, onOpenNew }) => {
-  const { document: currentDoc, setDocument, setFileHandle } = useAppStore();
+  const { document: currentDoc, setDocument, setFileHandle, setIsOneDriveModalOpen } = useAppStore();
 
   const handleOpenFileClick = async () => {
     try {
@@ -85,9 +85,14 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onContinueLast, on
     onOpenNew();
   };
 
+  const handleOpenOneDrive = () => {
+    setIsOneDriveModalOpen(true);
+    onOpenNew();
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 backdrop-blur-md p-4 animate-in fade-in duration-300">
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl max-w-4xl w-full p-6 sm:p-10 flex flex-col items-center text-center">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl max-w-5xl w-full p-6 sm:p-10 flex flex-col items-center text-center">
         {/* App Logo */}
         <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-500 text-white flex items-center justify-center shadow-lg shadow-blue-500/30 mb-4">
           <Highlighter className="w-9 h-9" />
@@ -100,8 +105,8 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onContinueLast, on
           Como você gostaria de começar sua sessão de leitura e edição hoje?
         </p>
 
-        {/* Three Main Option Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full">
+        {/* Option Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full">
           {/* Option 1: Continue Last Cached File */}
           <button
             onClick={onContinueLast}
@@ -149,7 +154,30 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onContinueLast, on
             </div>
           </button>
 
-          {/* Option 3: Start Blank File */}
+          {/* Option 3: OneDrive */}
+          <button
+            onClick={handleOpenOneDrive}
+            className="group relative flex flex-col items-center justify-between p-6 bg-slate-50 dark:bg-slate-800/80 hover:bg-sky-50/80 dark:hover:bg-slate-800 border-2 border-slate-200 dark:border-slate-700/70 hover:border-sky-500 dark:hover:border-sky-500 rounded-2xl transition-all duration-200 text-center shadow-sm hover:shadow-md cursor-pointer"
+          >
+            <div className="w-12 h-12 rounded-xl bg-sky-100 dark:bg-sky-900/50 text-sky-600 dark:text-sky-400 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+              <Cloud className="w-6 h-6" />
+            </div>
+
+            <div className="space-y-1 mb-3">
+              <h2 className="text-base font-bold text-slate-800 dark:text-slate-100 group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors">
+                OneDrive
+              </h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                Acessar arquivos armazenados na nuvem do OneDrive
+              </p>
+            </div>
+
+            <div className="w-full pt-3 border-t border-slate-200/60 dark:border-slate-700/60 flex items-center justify-center text-xs font-semibold text-sky-600 dark:text-sky-400">
+              Abrir da Nuvem...
+            </div>
+          </button>
+
+          {/* Option 4: Start Blank File */}
           <button
             onClick={handleStartBlankDoc}
             className="group relative flex flex-col items-center justify-between p-6 bg-slate-50 dark:bg-slate-800/80 hover:bg-purple-50/80 dark:hover:bg-slate-800 border-2 border-slate-200 dark:border-slate-700/70 hover:border-purple-500 dark:hover:border-purple-500 rounded-2xl transition-all duration-200 text-center shadow-sm hover:shadow-md cursor-pointer"
