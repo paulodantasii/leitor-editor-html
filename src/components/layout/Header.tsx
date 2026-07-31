@@ -340,7 +340,7 @@ export const Header: React.FC = () => {
                   }}
                   className="w-full p-2 text-left text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg flex items-center gap-2"
                 >
-                  <FolderOpen className="w-4 h-4 text-blue-500" /> Abrir HTML
+                  <FolderOpen className="w-4 h-4 text-blue-500" /> Abrir
                 </button>
                 <button
                   onClick={() => {
@@ -358,16 +358,7 @@ export const Header: React.FC = () => {
                   }}
                   className="w-full p-2 text-left text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg flex items-center gap-2"
                 >
-                  <Download className="w-4 h-4 text-purple-500" /> Exportar Cópia
-                </button>
-                <button
-                  onClick={() => {
-                    setIsSettingsModalOpen(true);
-                    setIsMobileMenuOpen(false);
-                  }}
-                  className="w-full p-2 text-left text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg flex items-center gap-2"
-                >
-                  <Settings className="w-4 h-4 text-slate-400" /> Configurações Azure
+                  <Download className="w-4 h-4 text-purple-500" /> Exportar
                 </button>
               </div>
             )}
