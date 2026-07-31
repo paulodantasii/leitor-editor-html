@@ -54,7 +54,7 @@ export const ReadingProgress: React.FC = () => {
       <span className="text-sm font-semibold text-slate-600 dark:text-slate-400 leading-tight">
         {scrollProgress}%
       </span>
-      <span className="text-[9px] font-medium text-slate-400 dark:text-slate-500 uppercase tracking-wider mt-0.5">
+      <span className="text-[9px] font-medium text-slate-600 dark:text-slate-400 uppercase tracking-wider mt-0.5">
         {timeDisplay}
       </span>
     </div>
