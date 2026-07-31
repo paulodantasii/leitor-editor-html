@@ -236,18 +236,6 @@ mark.hl-gray {
   -webkit-user-select: text !important;
 }
 
-.highlight-mode-active ::selection {
-  background: transparent !important;
-}
-
-.highlight-mode-active ::-webkit-selection {
-  background: transparent !important;
-}
-
-.highlight-mode-active ::-moz-selection {
-  background: transparent !important;
-}
-
 /* Custom scrollbars */
 ::-webkit-scrollbar {
   width: 8px;

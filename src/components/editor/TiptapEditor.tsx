@@ -431,30 +431,39 @@ export const TiptapEditor: React.FC = () => {
       if (!editor || !isHighlightMode || isEditable) return;
 
       const target = e.target as HTMLElement;
-      const markEl = target?.closest('mark');
 
-      // If user tapped on an existing mark, do NOT create a new highlight (allow click listener to open popover)
+      // 1. Ignore touches/clicks inside the popover UI (allows color changes on iPad while in Highlight Mode)
+      if (target?.closest('[data-highlight-popover]')) {
+        return;
+      }
+
+      // 2. Ignore touches/clicks on existing marks (allows tapping marks to open popover)
+      const markEl = target?.closest('mark');
       if (markEl) {
         return;
       }
 
-      const { from, to } = editor.state.selection;
-      if (from !== to) {
-        // Intercept drag selection and auto apply yellow highlight with unique group ID
-        const uniqueId = `hl-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
-        editor.chain().focus().setCustomHighlight({ color: 'yellow', id: uniqueId }).run();
+      // 3. Apply custom highlight on selection (with iPad WebKit 50ms buffer sync)
+      const applySelectionHighlight = () => {
+        if (!editor || editor.isDestroyed) return;
+        const { from, to } = editor.state.selection;
+        if (from !== to) {
+          const uniqueId = `hl-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+          editor.chain().focus().setCustomHighlight({ color: 'yellow', id: uniqueId }).run();
 
-        // Asynchronously clear native iOS WebKit selection overlay on iPad
-        setTimeout(() => {
-          window.getSelection()?.removeAllRanges();
-          document.getSelection()?.empty();
-        }, 30);
+          setTimeout(() => {
+            window.getSelection()?.removeAllRanges();
+          }, 30);
 
-        setPopoverPos(null);
-        setTargetMarkRange(null);
-        setTargetMarkId(null);
-        updateHighlightCount(editor);
-      }
+          setPopoverPos(null);
+          setTargetMarkRange(null);
+          setTargetMarkId(null);
+          updateHighlightCount(editor);
+        }
+      };
+
+      applySelectionHighlight();
+      setTimeout(applySelectionHighlight, 50);
     };
 
     const handleContextMenu = (e: MouseEvent) => {
