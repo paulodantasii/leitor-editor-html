@@ -190,9 +190,10 @@ mark.hl-gray {
 }
 
 .dark .ProseMirror blockquote {
-  border-left-color: #64748b;
-  background-color: #1e293b;
-  color: #cbd5e1;
+  border-left-color: #94a3b8;
+  background-color: #1e293b; /* Keeping it slightly dark but enough contrast */
+  background-color: rgba(255, 255, 255, 0.06); /* Better adaptive contrast */
+  color: #e2e8f0;
 }
 
 .ProseMirror img {
