@@ -185,8 +185,11 @@
       // 2. Remove citações perdidas como texto puro (suportando entidades HTML como &#91; e vírgulas)
       lastOutputHTML = lastOutputHTML.replace(/(\[|&#91;)\s*\d+(\s*,\s*\d+)*\s*(\]|&#93;)/g, '');
       
-      // 3. Remove os colchetes vazios "[]" que sobraram porque estavam pro lado de fora do link que foi deletado
-      lastOutputHTML = lastOutputHTML.replace(/(\[|&#91;)\s*(\]|&#93;)/g, '');
+      // 3. Remove os colchetes vazios "[]" que sobraram, MESMO que estejam separados por tags HTML (como <span> ou <!---->)
+      // Essa regex incrível pega o "[" e o "]", permitindo qualquer tag HTML ou espaço em branco entre eles, e deleta apenas os colchetes
+      lastOutputHTML = lastOutputHTML.replace(/(?:\[|&#91;)((\s|<[^>]+>|&nbsp;)*)(?:\]|&#93;)/gi, '$1');
+      // Roda duas vezes para pegar o caso de [][], que pode ter ficado encavalado
+      lastOutputHTML = lastOutputHTML.replace(/(?:\[|&#91;)((\s|<[^>]+>|&nbsp;)*)(?:\]|&#93;)/gi, '$1');
       
       // 4. Remove asteriscos residuais e espaços vazios exagerados
       lastOutputHTML = lastOutputHTML.replace(/\*\*\*/g, '');
