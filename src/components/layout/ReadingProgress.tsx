@@ -45,7 +45,9 @@ export const ReadingProgress: React.FC = () => {
 
   if (!currentDoc.content) return null;
 
-  const readingTimeMin = Math.max(1, Math.ceil(wordCount / 200));
+  const totalMinutes = wordCount / 200;
+  const remainingMinutes = Math.ceil(totalMinutes * ((100 - scrollProgress) / 100));
+  const timeDisplay = remainingMinutes > 0 ? `${remainingMinutes} min` : 'Fim';
 
   return (
     <div className="fixed bottom-5 right-5 z-40 bg-white/70 dark:bg-slate-900/70 backdrop-blur-md shadow-sm border border-slate-200 dark:border-slate-800 rounded-xl p-2 min-w-[3.5rem] flex flex-col items-center justify-center transition-all opacity-70 hover:opacity-100 pointer-events-none">
@@ -53,7 +55,7 @@ export const ReadingProgress: React.FC = () => {
         {scrollProgress}%
       </span>
       <span className="text-[9px] font-medium text-slate-400 dark:text-slate-500 uppercase tracking-wider mt-0.5">
-        {readingTimeMin} min
+        {timeDisplay}
       </span>
     </div>
   );
