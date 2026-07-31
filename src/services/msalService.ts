@@ -29,7 +29,7 @@ export async function getMsalInstance(): Promise<PublicClientApplication | null>
       auth: {
         clientId: clientId,
         authority: 'https://login.microsoftonline.com/common',
-        redirectUri: window.location.origin,
+        redirectUri: window.location.origin + import.meta.env.BASE_URL,
       },
       cache: {
         cacheLocation: 'localStorage',
