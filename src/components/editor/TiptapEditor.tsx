@@ -443,39 +443,33 @@ export const TiptapEditor: React.FC = () => {
         return;
       }
 
-      // 3. Apply custom highlight on selection (with iPad WebKit 50ms buffer sync)
-      const applySelectionHighlight = () => {
-        if (!editor || editor.isDestroyed) return;
-        const { from, to } = editor.state.selection;
-        if (from !== to) {
-          const uniqueId = `hl-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+      // 3. Apply custom highlight on drag selection
+      const { from, to } = editor.state.selection;
+      if (from !== to) {
+        const uniqueId = `hl-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
 
-          // Apply highlight and advance ProseMirror selection to release WebKit anchor
-          editor
-            .chain()
-            .focus()
-            .setCustomHighlight({ color: 'yellow', id: uniqueId })
-            .setTextSelection(to)
-            .run();
+        // Apply highlight and advance ProseMirror selection to release WebKit anchor
+        editor
+          .chain()
+          .focus()
+          .setCustomHighlight({ color: 'yellow', id: uniqueId })
+          .setTextSelection(to)
+          .run();
 
-          // Asynchronously release native iOS WebKit selection anchor memory
-          setTimeout(() => {
-            window.getSelection()?.removeAllRanges();
-            document.getSelection()?.empty();
-            if (document.activeElement instanceof HTMLElement) {
-              document.activeElement.blur();
-            }
-          }, 30);
+        // Asynchronously release native iOS WebKit selection anchor memory
+        setTimeout(() => {
+          window.getSelection()?.removeAllRanges();
+          document.getSelection()?.empty();
+          if (document.activeElement instanceof HTMLElement) {
+            document.activeElement.blur();
+          }
+        }, 30);
 
-          setPopoverPos(null);
-          setTargetMarkRange(null);
-          setTargetMarkId(null);
-          updateHighlightCount(editor);
-        }
-      };
-
-      applySelectionHighlight();
-      setTimeout(applySelectionHighlight, 50);
+        setPopoverPos(null);
+        setTargetMarkRange(null);
+        setTargetMarkId(null);
+        updateHighlightCount(editor);
+      }
     };
 
     const handleContextMenu = (e: MouseEvent) => {
@@ -525,6 +519,7 @@ export const TiptapEditor: React.FC = () => {
         .focus()
         .setTextSelection(range)
         .setCustomHighlight({ color, id: existingId })
+        .setTextSelection(range.to)
         .run();
     } else {
       editor.chain().focus().setCustomHighlight({ color, id: existingId }).run();
@@ -554,6 +549,7 @@ export const TiptapEditor: React.FC = () => {
         .focus()
         .setTextSelection(range)
         .unsetCustomHighlight()
+        .setTextSelection(range.to)
         .run();
     } else {
       editor.chain().focus().unsetCustomHighlight().run();
