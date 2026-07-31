@@ -191,7 +191,10 @@
       // Roda duas vezes para pegar o caso de [][], que pode ter ficado encavalado
       lastOutputHTML = lastOutputHTML.replace(/(?:\[|&#91;)((\s|<[^>]+>|&nbsp;)*)(?:\]|&#93;)/gi, '$1');
       
-      // 4. Remove asteriscos residuais e espaços vazios exagerados
+      // 4. Limpa todo o lixo do Angular (os comentários <!-- -->)
+      lastOutputHTML = lastOutputHTML.replace(/<!--[\s\S]*?-->/g, '');
+
+      // 5. Remove asteriscos residuais e espaços vazios exagerados
       lastOutputHTML = lastOutputHTML.replace(/\*\*\*/g, '');
 
       collectedResponses.push({
