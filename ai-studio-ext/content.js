@@ -78,6 +78,9 @@
     const btnSel = document.getElementById('ai-auto-btn-sel').value;
 
     for (let i = 0; i < prompts.length; i++) {
+      statusEl.innerText = "[" + (i + 1) + "/" + prompts.length + "] Pausa prévia (8s)...";
+      await wait(8000); // 8 segundos antes de fazer qualquer coisa
+      
       statusEl.innerText = "[" + (i + 1) + "/" + prompts.length + "] Buscando campo de texto...";
       
       let inputFields = document.querySelectorAll(inputSel);
@@ -97,54 +100,41 @@
         inputField.dispatchEvent(new Event('input', { bubbles: true }));
       }
       
-      await wait(1000); 
+      statusEl.innerText = "[" + (i + 1) + "/" + prompts.length + "] Texto colado. Pausa antes de enviar (8s)...";
+      await wait(8000); // 8 segundos após colar o texto e antes de clicar em Run
 
-      let runBtn = document.querySelector(btnSel);
-      // Fallback para encontrar botão com texto 'Run'
-      if (!runBtn || (runBtn.disabled && typeof runBtn.disabled === 'boolean')) {
-        let spans = Array.from(document.querySelectorAll('span, button')).filter(e => e.innerText && e.innerText.trim().toLowerCase() === 'run');
-        runBtn = spans[spans.length - 1]; // Pega o último (geralmente o da caixa ativa)
-      }
+      // Encontra o botão Run verdadeiro buscando pelo texto exato "Run"
+      let runBtnSpan = Array.from(document.querySelectorAll('.run-button-label, span, button')).find(e => e.innerText && e.innerText.trim().toLowerCase() === 'run');
+      let runBtn = runBtnSpan ? (runBtnSpan.tagName === 'BUTTON' ? runBtnSpan : runBtnSpan.closest('button')) : null;
 
       if (runBtn) {
         runBtn.click();
-        // Caso o clique no span não faça 'bubble' para o botão, clicamos no botão pai
-        if (runBtn.tagName !== 'BUTTON' && runBtn.closest('button')) {
-            runBtn.closest('button').click();
-        }
       } else {
         inputField.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
       }
 
+      statusEl.innerText = "[" + (i + 1) + "/" + prompts.length + "] Enviado! Aguardando estabilização (8s)...";
+      
+      await wait(8000); // 8 segundos para o botão mudar para Stop ou desativar com calma
+
       statusEl.innerText = "[" + (i + 1) + "/" + prompts.length + "] Aguardando IA terminar...";
       
-      await wait(4000); // Mais tempo para a UI atualizar para estado de carregamento
-
       let isGenerating = true;
       let waitTime = 0;
-      let lastTextLength = 0;
-      let unchangedCount = 0;
 
-      while (isGenerating && waitTime < 180000) { 
-        await wait(2000);
-        waitTime += 2000;
+      while (isGenerating && waitTime < 300000) { // Timeout de 5 minutos
+        await wait(3000); // Checa a cada 3 segundos
+        waitTime += 3000;
         
-        // Em vez de checar botões mutáveis, vamos usar uma heurística muito mais à prova de balas:
-        // Se o texto total da página parar de crescer/mudar por 6 segundos, a geração acabou!
-        let currentTextLength = document.body.innerText.length;
+        let currentRunBtnSpan = Array.from(document.querySelectorAll('.run-button-label, span, button')).find(e => e.innerText && e.innerText.trim().toLowerCase() === 'run');
+        let currentRunBtn = currentRunBtnSpan ? (currentRunBtnSpan.tagName === 'BUTTON' ? currentRunBtnSpan : currentRunBtnSpan.closest('button')) : null;
         
-        if (currentTextLength !== lastTextLength) {
-            lastTextLength = currentTextLength;
-            unchangedCount = 0; // O texto mudou, zera o contador
-        } else {
-            unchangedCount++;
-            if (unchangedCount >= 3) { // 3 tentativas de 2s = 6 segundos sem nenhuma letra nova
-                isGenerating = false;
-            }
+        if (currentRunBtn && !currentRunBtn.disabled && currentRunBtn.offsetWidth > 0) {
+            statusEl.innerText = "[" + (i + 1) + "/" + prompts.length + "] Resposta finalizada! Pausa de renderização (8s)...";
+            await wait(8000); // 8 segundos extras após o botão acender para garantir que a interface processou todo o Markdown
+            isGenerating = false;
         }
       }
-
-      await wait(2000); 
 
       // Busca mensagens no AI Studio com precisão cirúrgica
       let lastOutputHTML = "<p><i>Erro ao extrair resposta.</i></p>";
