@@ -271,20 +271,15 @@ export const Header: React.FC = () => {
             <button
               onClick={handleOpenFile}
               title="Abrir arquivo HTML local"
-              className="px-3 py-1.5 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-1.5 text-xs font-medium transition-colors"
+              className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center gap-1.5 text-xs font-medium transition-colors"
             >
               <FolderOpen className="w-4 h-4 text-blue-500" /> Abrir
             </button>
 
-            {/* Botão Salvar (Sobrescrever arquivo original) */}
             <button
               onClick={handleSaveFile}
               title="Salvar alterações substituindo o arquivo original (Ctrl+S)"
-              className={`px-3 py-1.5 rounded-xl flex items-center gap-1.5 text-xs font-medium transition-colors ${
-                currentDoc.isDirty
-                  ? 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 font-semibold ring-1 ring-emerald-400/50'
-                  : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
-              }`}
+              className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center gap-1.5 text-xs font-medium transition-colors"
             >
               <Save className="w-4 h-4 text-emerald-500" /> Salvar
             </button>
@@ -293,7 +288,7 @@ export const Header: React.FC = () => {
             <button
               onClick={handleExportHTML}
               title="Baixar nova cópia standalone com grifos"
-              className="px-3 py-1.5 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-1.5 text-xs font-medium transition-colors"
+              className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center gap-1.5 text-xs font-medium transition-colors"
             >
               <Download className="w-4 h-4 text-purple-500" /> Exportar
             </button>
@@ -305,11 +300,7 @@ export const Header: React.FC = () => {
           {/* OneDrive Sync Button */}
           <button
             onClick={() => setIsOneDriveModalOpen(true)}
-            className={`px-3 py-1.5 rounded-xl font-medium text-xs flex items-center gap-1.5 transition-all shadow-sm ${
-              userProfile
-                ? 'bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700'
-                : 'bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800 hover:bg-blue-100'
-            }`}
+            className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center gap-1.5 text-xs font-medium transition-colors"
           >
             <Cloud className="w-4 h-4 text-blue-500" />
             <span className="hidden sm:inline">
@@ -326,7 +317,11 @@ export const Header: React.FC = () => {
           <div className="relative lg:hidden">
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="px-2 py-1.5 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+              className={`px-2 py-1.5 rounded-xl transition-colors ${
+                isMobileMenuOpen
+                  ? 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
+                  : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+              }`}
             >
               <MoreVertical className="w-5 h-5" />
             </button>
