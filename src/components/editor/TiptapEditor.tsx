@@ -188,6 +188,21 @@ export const TiptapEditor: React.FC = () => {
   const [targetMarkRange, setTargetMarkRange] = useState<{ from: number; to: number } | null>(null);
   const [targetMarkId, setTargetMarkId] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const isMouseDownRef = useRef(false);
+
+  // Track global mouse down state for PC dragging
+  useEffect(() => {
+    const handleDown = () => (isMouseDownRef.current = true);
+    const handleUp = () => (isMouseDownRef.current = false);
+    
+    window.addEventListener('mousedown', handleDown);
+    window.addEventListener('mouseup', handleUp);
+    
+    return () => {
+      window.removeEventListener('mousedown', handleDown);
+      window.removeEventListener('mouseup', handleUp);
+    };
+  }, []);
 
   // Accurately counts unique connected highlight entities
   const updateHighlightCount = useCallback(
@@ -252,8 +267,15 @@ export const TiptapEditor: React.FC = () => {
 
       const { from, to, $from } = editor.state.selection;
 
-      // Case A: User selected a text range in Highlight Mode -> APPLY HIGHLIGHT INSTANTLY!
+      // Case A: User selected a text range in Highlight Mode -> APPLY HIGHLIGHT
       if (isHighlightMode && !editor.isDestroyed && from !== to) {
+        // Prevent instant highlight while dragging on PC
+        if (isMouseDownRef.current) {
+          setTargetMarkRange({ from, to });
+          setTargetMarkId(null);
+          return;
+        }
+
         const uniqueId = `hl-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
 
         // Apply yellow highlight immediately and advance selection to release anchor
@@ -277,7 +299,7 @@ export const TiptapEditor: React.FC = () => {
         setTargetMarkRange(null);
         setTargetMarkId(null);
         updateHighlightCount(editor);
-      } 
+      }
       // Case B: Cursor is inside a mark (collapsed selection)
       else if (editor.isActive('customHighlight')) {
         const markRange = getFullMarkRange(editor, $from);
