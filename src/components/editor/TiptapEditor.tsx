@@ -189,6 +189,7 @@ export const TiptapEditor: React.FC = () => {
   const [targetMarkId, setTargetMarkId] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const isMouseDownRef = useRef(false);
+  const highlightTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Track global mouse down state for PC dragging
   useEffect(() => {
@@ -276,29 +277,38 @@ export const TiptapEditor: React.FC = () => {
           return;
         }
 
-        const uniqueId = `hl-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+        // On touch devices (iPad), native OS selection handles don't fire touchend when dragged.
+        // We debounce the auto-highlight so the user has time to adjust the handles before we lock it in.
+        if (highlightTimeoutRef.current) {
+          clearTimeout(highlightTimeoutRef.current);
+        }
 
-        // Apply yellow highlight immediately and advance selection to release anchor
-        editor
-          .chain()
-          .focus()
-          .setCustomHighlight({ color: 'yellow', id: uniqueId })
-          .setTextSelection(to)
-          .run();
+        highlightTimeoutRef.current = setTimeout(() => {
+          const currentSel = editor.state.selection;
+          if (currentSel.from !== currentSel.to) {
+            const uniqueId = `hl-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
 
-        // Clear native browser text selection handles immediately
-        setTimeout(() => {
-          window.getSelection()?.removeAllRanges();
-          document.getSelection()?.empty();
-          if (document.activeElement instanceof HTMLElement) {
-            document.activeElement.blur();
+            editor
+              .chain()
+              .focus()
+              .setCustomHighlight({ color: 'yellow', id: uniqueId })
+              .setTextSelection(currentSel.to)
+              .run();
+
+            setTimeout(() => {
+              window.getSelection()?.removeAllRanges();
+              document.getSelection()?.empty();
+              if (document.activeElement instanceof HTMLElement) {
+                document.activeElement.blur();
+              }
+            }, 20);
+
+            setPopoverPos(null);
+            setTargetMarkRange(null);
+            setTargetMarkId(null);
+            updateHighlightCount(editor);
           }
-        }, 20);
-
-        setPopoverPos(null);
-        setTargetMarkRange(null);
-        setTargetMarkId(null);
-        updateHighlightCount(editor);
+        }, 700); // 700ms gives enough time to adjust handles on iPad
       }
       // Case B: Cursor is inside a mark (collapsed selection)
       else if (editor.isActive('customHighlight')) {
@@ -489,6 +499,10 @@ export const TiptapEditor: React.FC = () => {
       // 3. Apply custom highlight on drag selection
       const { from, to } = editor.state.selection;
       if (from !== to) {
+        if (highlightTimeoutRef.current) {
+          clearTimeout(highlightTimeoutRef.current);
+        }
+
         const uniqueId = `hl-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
 
         // Apply highlight and advance ProseMirror selection to release WebKit anchor
