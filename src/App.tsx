@@ -6,6 +6,8 @@ import { SettingsModal } from './components/modals/SettingsModal';
 import { WelcomeScreen } from './components/modals/WelcomeScreen';
 import { useAppStore } from './store/useAppStore';
 
+import { ReadingProgress } from './components/layout/ReadingProgress';
+
 export const App: React.FC = () => {
   const { preferences } = useAppStore();
 
@@ -51,7 +53,7 @@ export const App: React.FC = () => {
     >
       <Header />
 
-      <main className="flex-1 flex flex-col items-center">
+      <main className="flex-1 flex flex-col items-center relative">
         <TiptapEditor />
       </main>
 
@@ -63,6 +65,7 @@ export const App: React.FC = () => {
         />
       )}
 
+      <ReadingProgress />
       <OneDriveModal />
       <SettingsModal />
     </div>
