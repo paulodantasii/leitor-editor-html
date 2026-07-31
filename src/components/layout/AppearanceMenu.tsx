@@ -47,7 +47,7 @@ export const AppearanceMenu: React.FC = () => {
       <button
         onClick={() => setIsOpen(!isOpen)}
         title="Aparência e Tipografia"
-        className={`p-2 rounded-lg transition-colors flex items-center gap-1.5 ${
+        className={`px-3 py-1.5 rounded-xl transition-colors flex items-center gap-1.5 ${
           isOpen
             ? 'bg-slate-200 dark:bg-slate-700 text-blue-600 dark:text-blue-400'
             : 'hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300'
