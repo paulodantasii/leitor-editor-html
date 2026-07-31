@@ -1,6 +1,6 @@
 import React from 'react';
 import { useAppStore } from '../../store/useAppStore';
-import { Highlighter, History, FolderOpen, FileText } from 'lucide-react';
+import { Highlighter, History, FolderOpen, FileText, FilePlus } from 'lucide-react';
 import { sanitizeHTML } from '../../services/sanitizer';
 
 interface WelcomeScreenProps {
@@ -73,9 +73,21 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onContinueLast, on
     }
   };
 
+  const handleStartBlankDoc = () => {
+    setFileHandle(null);
+    setDocument({
+      title: 'Sem Título',
+      content: '<p></p>',
+      oneDriveItemId: null,
+      lastSavedAt: new Date().toLocaleTimeString(),
+      isDirty: false,
+    });
+    onOpenNew();
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 backdrop-blur-md p-4 animate-in fade-in duration-300">
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl max-w-2xl w-full p-6 sm:p-10 flex flex-col items-center text-center">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl max-w-4xl w-full p-6 sm:p-10 flex flex-col items-center text-center">
         {/* App Logo */}
         <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-500 text-white flex items-center justify-center shadow-lg shadow-blue-500/30 mb-4">
           <Highlighter className="w-9 h-9" />
@@ -88,8 +100,8 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onContinueLast, on
           Como você gostaria de começar sua sessão de leitura e edição hoje?
         </p>
 
-        {/* Two Main Option Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
+        {/* Three Main Option Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full">
           {/* Option 1: Continue Last Cached File */}
           <button
             onClick={onContinueLast}
@@ -101,7 +113,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onContinueLast, on
 
             <div className="space-y-1 mb-3">
               <h2 className="text-base font-bold text-slate-800 dark:text-slate-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                Continuar Último Arquivo
+                Continuar Último
               </h2>
               <p className="text-xs text-slate-500 dark:text-slate-400">
                 Abrir o documento salvo no cache do navegador
@@ -110,7 +122,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onContinueLast, on
 
             <div className="w-full pt-3 border-t border-slate-200/60 dark:border-slate-700/60 flex items-center justify-center gap-1.5 text-xs font-semibold text-slate-600 dark:text-slate-300 truncate">
               <FileText className="w-3.5 h-3.5 text-blue-500 shrink-0" />
-              <span className="truncate max-w-[180px]">{currentDoc.title}</span>
+              <span className="truncate max-w-[120px]">{currentDoc.title}</span>
             </div>
           </button>
 
@@ -125,15 +137,38 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onContinueLast, on
 
             <div className="space-y-1 mb-3">
               <h2 className="text-base font-bold text-slate-800 dark:text-slate-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
-                Abrir Novo Arquivo
+                Abrir Arquivo
               </h2>
               <p className="text-xs text-slate-500 dark:text-slate-400">
-                Selecionar um arquivo .html do seu computador ou iPad
+                Selecionar um arquivo .html do seu dispositivo
               </p>
             </div>
 
             <div className="w-full pt-3 border-t border-slate-200/60 dark:border-slate-700/60 flex items-center justify-center text-xs font-semibold text-emerald-600 dark:text-emerald-400">
               Escolher Arquivo...
+            </div>
+          </button>
+
+          {/* Option 3: Start Blank File */}
+          <button
+            onClick={handleStartBlankDoc}
+            className="group relative flex flex-col items-center justify-between p-6 bg-slate-50 dark:bg-slate-800/80 hover:bg-purple-50/80 dark:hover:bg-slate-800 border-2 border-slate-200 dark:border-slate-700/70 hover:border-purple-500 dark:hover:border-purple-500 rounded-2xl transition-all duration-200 text-center shadow-sm hover:shadow-md cursor-pointer"
+          >
+            <div className="w-12 h-12 rounded-xl bg-purple-100 dark:bg-purple-900/50 text-purple-600 dark:text-purple-400 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+              <FilePlus className="w-6 h-6" />
+            </div>
+
+            <div className="space-y-1 mb-3">
+              <h2 className="text-base font-bold text-slate-800 dark:text-slate-100 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
+                Novo Documento
+              </h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                Iniciar um documento em branco do zero
+              </p>
+            </div>
+
+            <div className="w-full pt-3 border-t border-slate-200/60 dark:border-slate-700/60 flex items-center justify-center text-xs font-semibold text-purple-600 dark:text-purple-400">
+              Criar Novo...
             </div>
           </button>
         </div>
