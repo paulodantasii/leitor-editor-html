@@ -58,6 +58,10 @@ mark.hl-blue {
   background-color: #bae6fd;
 }
 
+mark.hl-red {
+  background-color: #fecaca;
+}
+
 mark.hl-pink {
   background-color: #fbcfe8;
 }
@@ -86,6 +90,11 @@ mark.hl-gray {
 
 .dark mark.hl-blue {
   background-color: #7dd3fc;
+  color: #0f172a;
+}
+
+.dark mark.hl-red {
+  background-color: #f87171;
   color: #0f172a;
 }
 

@@ -8,7 +8,7 @@ export const SAMPLE_LEGISLATION_DOC = `
   <li>I - a soberania;</li>
   <li>II - a <mark class="hl-blue" data-color="blue">cidadania</mark>;</li>
   <li>III - a <mark class="hl-green" data-color="green">dignidade da pessoa humana</mark>;</li>
-  <li>IV - os <mark class="hl-pink" data-color="pink">valores sociais do trabalho e da livre iniciativa</mark>;</li>
+  <li>IV - os <mark class="hl-red" data-color="red">valores sociais do trabalho e da livre iniciativa</mark>;</li>
   <li>V - o pluralismo político.</li>
 </ul>
 <p><em>Parágrafo único.</em> Todo o poder emana do povo, que o exerce por meio de representantes eleitos ou diretamente, nos termos desta Constituição.</p>

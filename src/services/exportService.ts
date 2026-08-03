@@ -14,6 +14,7 @@ const HIGHLIGHT_EMBEDDED_STYLES = `
     }
     mark.hl-yellow { background-color: #fef08a; color: #1e293b; }
     mark.hl-blue   { background-color: #bae6fd; color: #0f172a; }
+    mark.hl-red    { background-color: #fecaca; color: #0f172a; }
     mark.hl-pink   { background-color: #fbcfe8; color: #0f172a; }
     mark.hl-green  { background-color: #bbf7d0; color: #0f172a; }
     mark.hl-purple { background-color: #e9d5ff; color: #0f172a; }
@@ -27,6 +28,7 @@ const HIGHLIGHT_EMBEDDED_STYLES = `
       }
       mark.hl-yellow { background-color: #fef08a; color: #1e293b; }
       mark.hl-blue   { background-color: #7dd3fc; color: #0f172a; }
+      mark.hl-red    { background-color: #f87171; color: #0f172a; }
       mark.hl-pink   { background-color: #f472b6; color: #0f172a; }
       mark.hl-green  { background-color: #86efac; color: #0f172a; }
       mark.hl-purple { background-color: #d8b4fe; color: #0f172a; }

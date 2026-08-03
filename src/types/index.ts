@@ -1,4 +1,4 @@
-export type HighlightColor = 'yellow' | 'blue' | 'pink' | 'green' | 'purple' | 'orange' | 'gray';
+export type HighlightColor = 'yellow' | 'blue' | 'red' | 'pink' | 'green' | 'purple' | 'orange' | 'gray';
 
 export interface HighlightColorOption {
   id: HighlightColor;

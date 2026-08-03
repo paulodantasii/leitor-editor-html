@@ -5,7 +5,7 @@ import { Trash2 } from 'lucide-react';
 export const HIGHLIGHT_COLORS: HighlightColorOption[] = [
   { id: 'yellow', name: 'Amarelo', bgClass: 'bg-amber-200 hover:bg-amber-300 dark:bg-yellow-300', borderClass: 'border-amber-400', hex: '#fef08a' },
   { id: 'blue', name: 'Azul', bgClass: 'bg-sky-200 hover:bg-sky-300 dark:bg-sky-300', borderClass: 'border-sky-400', hex: '#bae6fd' },
-  { id: 'pink', name: 'Rosa', bgClass: 'bg-pink-200 hover:bg-pink-300 dark:bg-pink-300', borderClass: 'border-pink-400', hex: '#fbcfe8' },
+  { id: 'red', name: 'Vermelho', bgClass: 'bg-red-200 hover:bg-red-300 dark:bg-red-300', borderClass: 'border-red-400', hex: '#fecaca' },
   { id: 'green', name: 'Verde', bgClass: 'bg-emerald-200 hover:bg-emerald-300 dark:bg-emerald-300', borderClass: 'border-emerald-400', hex: '#bbf7d0' },
   { id: 'purple', name: 'Roxo', bgClass: 'bg-purple-200 hover:bg-purple-300 dark:bg-purple-300', borderClass: 'border-purple-400', hex: '#e9d5ff' },
   { id: 'orange', name: 'Laranja', bgClass: 'bg-orange-200 hover:bg-orange-300 dark:bg-orange-300', borderClass: 'border-orange-400', hex: '#fed7aa' },
