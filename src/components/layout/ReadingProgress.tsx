@@ -45,7 +45,7 @@ export const ReadingProgress: React.FC = () => {
 
   if (!currentDoc.content) return null;
 
-  const totalMinutes = wordCount / 200;
+  const totalMinutes = wordCount / 130;
   const remainingMinutes = Math.ceil(totalMinutes * ((100 - scrollProgress) / 100));
   const timeDisplay = remainingMinutes > 0 ? `${remainingMinutes} min` : 'Fim';
 

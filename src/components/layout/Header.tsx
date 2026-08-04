@@ -204,7 +204,7 @@ export const Header: React.FC = () => {
   };
 
   return (
-    <header className="sticky top-0 z-30 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-4 py-2.5 transition-colors">
+    <header className="sticky top-0 z-30 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 py-2.5 transition-colors header-safe-area">
       <div className="max-w-7xl mx-auto flex items-center justify-between gap-2">
         {/* Left Section: Logo & Document Title */}
         <div className="flex items-center gap-3 min-w-0">

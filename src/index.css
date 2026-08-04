@@ -24,6 +24,11 @@
   }
 }
 
+/* Safe area top padding for sticky header on iPad / iOS */
+.header-safe-area {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
 /* Custom Highlight Mark Styling (Pastel colors) */
 mark {
   background-color: #fef08a;

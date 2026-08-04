@@ -27,12 +27,15 @@ export const App: React.FC = () => {
     }
   }, []);
 
-  // Sync theme class on document element
+  // Sync theme class on document element & meta theme-color
   useEffect(() => {
+    const themeColorMeta = document.querySelector('meta[name="theme-color"]');
     if (preferences.theme === 'dark') {
       document.documentElement.classList.add('dark');
+      if (themeColorMeta) themeColorMeta.setAttribute('content', '#0f172a');
     } else {
       document.documentElement.classList.remove('dark');
+      if (themeColorMeta) themeColorMeta.setAttribute('content', '#ffffff');
     }
   }, [preferences.theme]);
 
