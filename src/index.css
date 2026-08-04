@@ -26,7 +26,8 @@
 
 /* Safe area top padding for sticky header on iPad / iOS */
 .header-safe-area {
-  padding-top: env(safe-area-inset-top, 0px);
+  padding-top: calc(0.625rem + env(safe-area-inset-top, 0px));
+  padding-bottom: 0.625rem;
 }
 
 /* Custom Highlight Mark Styling (Pastel colors) */
