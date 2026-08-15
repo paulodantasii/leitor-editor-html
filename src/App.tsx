@@ -50,8 +50,9 @@ export const App: React.FC = () => {
   // Register PWA Service Worker
   useEffect(() => {
     if ('serviceWorker' in navigator && import.meta.env.PROD) {
+      const swUrl = `${import.meta.env.BASE_URL}sw.js`;
       navigator.serviceWorker
-        .register('/sw.js')
+        .register(swUrl)
         .then((reg) => console.log('Service Worker registrado com sucesso:', reg.scope))
         .catch((err) => console.warn('Falha no registro do Service Worker:', err));
     }

@@ -4,7 +4,7 @@ import path from 'path';
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  base: '/leitor-editor-html/',
+  base: '/leitor-editor-md/',
   plugins: [react()],
   resolve: {
     alias: {
