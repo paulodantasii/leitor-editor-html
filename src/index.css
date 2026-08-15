@@ -62,8 +62,7 @@ mark.hl-end {
 }
 
 /* Synchronized Hover effect for unified highlight blocks */
-mark.mark-hovered,
-mark:hover {
+mark.mark-hovered {
   filter: brightness(0.92);
 }
 

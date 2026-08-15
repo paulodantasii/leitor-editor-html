@@ -34,9 +34,20 @@ function getConnectedMarkElements(markEl: HTMLElement, container: HTMLElement): 
   return [markEl];
 }
 
+let boundarySyncRaf: number | null = null;
+
 /**
- * Helper to update boundary classes on an element without redundant DOM writes.
+ * Batched, non-blocking boundary synchronization via requestAnimationFrame.
  */
+function requestSyncMarkBoundaries(container: HTMLElement | null) {
+  if (!container) return;
+  if (boundarySyncRaf !== null) return;
+  boundarySyncRaf = requestAnimationFrame(() => {
+    boundarySyncRaf = null;
+    syncMarkBoundaries(container);
+  });
+}
+
 function setMarkBoundaryClass(el: HTMLElement, cls: 'hl-single' | 'hl-start' | 'hl-middle' | 'hl-end') {
   const classes: Array<'hl-single' | 'hl-start' | 'hl-middle' | 'hl-end'> = ['hl-single', 'hl-start', 'hl-middle', 'hl-end'];
   classes.forEach((c) => {
@@ -277,6 +288,10 @@ export const TiptapEditor: React.FC = () => {
       
       updateDocumentContent(cleanMarkdown);
       updateHighlightCount(editor);
+      requestSyncMarkBoundaries(containerRef.current);
+    },
+    onTransaction: () => {
+      requestSyncMarkBoundaries(containerRef.current);
     },
     onSelectionUpdate: ({ editor }) => {
       if (!editor) return;
@@ -497,22 +512,17 @@ export const TiptapEditor: React.FC = () => {
     };
   }, [editor, setActiveHighlightColor]);
 
-  // Keep mark boundary classes synchronized on render / content updates
+  // Keep mark boundary classes synchronized on render / content / mode updates
   useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
-
-    syncMarkBoundaries(container);
-  }, [editor, currentDoc.oneDriveItemId, currentDoc.content]);
+    requestSyncMarkBoundaries(containerRef.current);
+  }, [editor, isEditable, isHighlightMode, currentDoc.oneDriveItemId, currentDoc.content]);
 
   // Update content when document changes externally
   useEffect(() => {
     if (editor && currentDoc.content && editor.storage.markdown.getMarkdown() !== currentDoc.content) {
       editor.commands.setContent(currentDoc.content, false);
       updateHighlightCount(editor);
-      if (containerRef.current) {
-        syncMarkBoundaries(containerRef.current);
-      }
+      requestSyncMarkBoundaries(containerRef.current);
     }
   }, [currentDoc.content, editor, updateHighlightCount]);
 
@@ -520,6 +530,7 @@ export const TiptapEditor: React.FC = () => {
   useEffect(() => {
     if (editor) {
       editor.setEditable(isEditable);
+      requestSyncMarkBoundaries(containerRef.current);
     }
   }, [isEditable, editor]);
 
