@@ -18,84 +18,20 @@ import { EditorToolbar } from './EditorToolbar';
 import { HighlightColor } from '../../types';
 
 /**
- * Checks if there is any unhighlighted text or space between two <mark> elements in the DOM.
- */
-function hasUnhighlightedTextBetween(m1: HTMLElement, m2: HTMLElement): boolean {
-  try {
-    const range = document.createRange();
-    range.setStartAfter(m1);
-    range.setEndBefore(m2);
-
-    const fragment = range.cloneContents();
-    fragment.querySelectorAll('mark').forEach((mark) => mark.remove());
-
-    const remainingText = fragment.textContent || '';
-    return remainingText.length > 0;
-  } catch (err) {
-    return true;
-  }
-}
-
-/**
- * Checks if two <mark> DOM elements are part of a single contiguous highlight selection.
- */
-function areMarksConnected(m1: HTMLElement, m2: HTMLElement): boolean {
-  const id1 = m1.getAttribute('data-id') || m1.getAttribute('data-hl-id');
-  const id2 = m2.getAttribute('data-id') || m2.getAttribute('data-hl-id');
-
-  if (id1 && id2) {
-    return id1 === id2;
-  }
-
-  const color1 = m1.getAttribute('data-color') || m1.className.match(/hl-(\w+)/)?.[1];
-  const color2 = m2.getAttribute('data-color') || m2.className.match(/hl-(\w+)/)?.[1];
-
-  if (color1 !== color2) return false;
-
-  return !hasUnhighlightedTextBetween(m1, m2);
-}
-
-/**
- * Finds all connected contiguous <mark> DOM elements belonging to the same highlight selection action.
+ * Finds all connected contiguous <mark> DOM elements belonging to the same highlight selection.
  */
 function getConnectedMarkElements(markEl: HTMLElement, container: HTMLElement): HTMLElement[] {
   const hlId = markEl.getAttribute('data-id') || markEl.getAttribute('data-hl-id');
   if (hlId) {
-    const matchingMarks = Array.from(container.querySelectorAll(`mark[data-id="${hlId}"], mark[data-hl-id="${hlId}"]`)) as HTMLElement[];
+    const matchingMarks = Array.from(
+      container.querySelectorAll(`mark[data-id="${hlId}"], mark[data-hl-id="${hlId}"]`)
+    ) as HTMLElement[];
     if (matchingMarks.length > 0) {
       return matchingMarks;
     }
   }
 
-  // Fallback for legacy HTML without data-hl-id
-  const allMarks = Array.from(container.querySelectorAll('mark')) as HTMLElement[];
-  const markIndex = allMarks.indexOf(markEl);
-
-  if (allMarks.length === 0 || markIndex === -1) return [markEl];
-
-  let startIdx = markIndex;
-  while (startIdx > 0) {
-    const prev = allMarks[startIdx - 1];
-    const curr = allMarks[startIdx];
-    if (areMarksConnected(prev, curr)) {
-      startIdx--;
-    } else {
-      break;
-    }
-  }
-
-  let endIdx = markIndex;
-  while (endIdx < allMarks.length - 1) {
-    const curr = allMarks[endIdx];
-    const next = allMarks[endIdx + 1];
-    if (areMarksConnected(curr, next)) {
-      endIdx++;
-    } else {
-      break;
-    }
-  }
-
-  return allMarks.slice(startIdx, endIdx + 1);
+  return [markEl];
 }
 
 /**
@@ -289,20 +225,20 @@ export const TiptapEditor: React.FC = () => {
         return;
       }
 
-      // Group marks by unique data-hl-id if available
+      // Group marks by unique data-id / data-hl-id if available
       const uniqueIds = new Set<string>();
-      let legacyGroupCount = 0;
+      let unassignedCount = 0;
 
       for (let i = 0; i < allMarks.length; i++) {
         const hlId = allMarks[i].getAttribute('data-id') || allMarks[i].getAttribute('data-hl-id');
         if (hlId) {
           uniqueIds.add(hlId);
-        } else if (i === 0 || !areMarksConnected(allMarks[i - 1], allMarks[i])) {
-          legacyGroupCount++;
+        } else {
+          unassignedCount++;
         }
       }
 
-      setHighlightCount(uniqueIds.size + legacyGroupCount);
+      setHighlightCount(uniqueIds.size + unassignedCount);
     },
     [setHighlightCount]
   );
@@ -507,37 +443,13 @@ export const TiptapEditor: React.FC = () => {
       }
     };
 
-    // Synchronize hover state across connected mark elements
-    const handleMouseOver = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      if (target.closest('[data-highlight-popover]')) return;
-
-      const markEl = target.closest('mark');
-      if (markEl && containerRef.current) {
-        const connectedMarks = getConnectedMarkElements(markEl, containerRef.current);
-        connectedMarks.forEach((m) => m.classList.add('mark-hovered'));
-      }
-    };
-
-    const handleMouseOut = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      const markEl = target.closest('mark');
-      if (markEl && containerRef.current) {
-        containerRef.current.querySelectorAll('mark.mark-hovered').forEach((m) => m.classList.remove('mark-hovered'));
-      }
-    };
-
     const container = containerRef.current;
     if (container) {
       container.addEventListener('click', handleDomClick);
-      container.addEventListener('mouseover', handleMouseOver);
-      container.addEventListener('mouseout', handleMouseOut);
     }
     return () => {
       if (container) {
         container.removeEventListener('click', handleDomClick);
-        container.removeEventListener('mouseover', handleMouseOver);
-        container.removeEventListener('mouseout', handleMouseOut);
       }
     };
   }, [editor, setActiveHighlightColor]);
@@ -548,20 +460,6 @@ export const TiptapEditor: React.FC = () => {
     if (!container) return;
 
     syncMarkBoundaries(container);
-
-    const observer = new MutationObserver(() => {
-      syncMarkBoundaries(container);
-    });
-
-    observer.observe(container, {
-      childList: true,
-      subtree: true,
-      characterData: true,
-    });
-
-    return () => {
-      observer.disconnect();
-    };
   }, [editor, currentDoc.oneDriveItemId, currentDoc.content]);
 
   // Update content when document changes externally
