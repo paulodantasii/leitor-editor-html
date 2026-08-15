@@ -9,13 +9,43 @@ import { useAppStore } from './store/useAppStore';
 import { ReadingProgress } from './components/layout/ReadingProgress';
 
 export const App: React.FC = () => {
-  const { preferences, loadCachedDocument } = useAppStore();
+  const { preferences, loadCachedDocument, toggleHighlightMode } = useAppStore();
 
   // Show Welcome screen if opening browser from scratch (sessionStorage empty)
   const [showWelcome, setShowWelcome] = useState<boolean>(() => {
     const hasSession = sessionStorage.getItem('has_active_session');
     return !hasSession;
   });
+
+  // Global Keyboard Shortcuts (Press 'G' to toggle Highlight mode)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Ignore if combined with modifier keys (Ctrl, Alt, Meta)
+      if (e.ctrlKey || e.altKey || e.metaKey) return;
+
+      if (e.key === 'g' || e.key === 'G') {
+        const target = e.target as HTMLElement | null;
+        // Don't trigger if user is typing inside an input, textarea, select or contenteditable area
+        const isTyping =
+          target &&
+          (target.tagName === 'INPUT' ||
+            target.tagName === 'TEXTAREA' ||
+            target.tagName === 'SELECT' ||
+            target.isContentEditable ||
+            Boolean(target.closest('[contenteditable="true"]')));
+
+        if (!isTyping) {
+          e.preventDefault();
+          toggleHighlightMode();
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [toggleHighlightMode]);
 
   // Register PWA Service Worker
   useEffect(() => {
