@@ -443,13 +443,56 @@ export const TiptapEditor: React.FC = () => {
       }
     };
 
+    let currentHoveredId: string | null = null;
+
+    const handleMouseOver = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (!containerRef.current || target.closest('[data-highlight-popover]')) return;
+
+      const markEl = target.closest('mark');
+      const hlId = markEl ? (markEl.getAttribute('data-id') || markEl.getAttribute('data-hl-id')) : null;
+
+      if (hlId === currentHoveredId) return;
+
+      // Clear previous hover
+      if (currentHoveredId) {
+        containerRef.current
+          .querySelectorAll(`mark[data-id="${currentHoveredId}"], mark[data-hl-id="${currentHoveredId}"]`)
+          .forEach((m) => m.classList.remove('mark-hovered'));
+      } else {
+        containerRef.current.querySelectorAll('mark.mark-hovered').forEach((m) => m.classList.remove('mark-hovered'));
+      }
+
+      currentHoveredId = hlId;
+
+      // Apply synchronized hover to all connected marks
+      if (hlId) {
+        containerRef.current
+          .querySelectorAll(`mark[data-id="${hlId}"], mark[data-hl-id="${hlId}"]`)
+          .forEach((m) => m.classList.add('mark-hovered'));
+      } else if (markEl) {
+        markEl.classList.add('mark-hovered');
+      }
+    };
+
+    const handleMouseLeave = () => {
+      if (containerRef.current) {
+        containerRef.current.querySelectorAll('mark.mark-hovered').forEach((m) => m.classList.remove('mark-hovered'));
+      }
+      currentHoveredId = null;
+    };
+
     const container = containerRef.current;
     if (container) {
       container.addEventListener('click', handleDomClick);
+      container.addEventListener('mouseover', handleMouseOver);
+      container.addEventListener('mouseleave', handleMouseLeave);
     }
     return () => {
       if (container) {
         container.removeEventListener('click', handleDomClick);
+        container.removeEventListener('mouseover', handleMouseOver);
+        container.removeEventListener('mouseleave', handleMouseLeave);
       }
     };
   }, [editor, setActiveHighlightColor]);
