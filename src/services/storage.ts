@@ -1,8 +1,8 @@
 import { UserPreferences, DocumentState } from '../types';
 
-const PREFS_KEY = 'leitor_html_preferences';
-const DOC_KEY = 'leitor_html_document';
-const OFFLINE_QUEUE_KEY = 'leitor_html_offline_queue';
+const PREFS_KEY = 'leitor_md_preferences';
+const DOC_KEY = 'leitor_md_document';
+const OFFLINE_QUEUE_KEY = 'leitor_md_offline_queue';
 
 export const DEFAULT_PREFERENCES: UserPreferences = {
   theme: 'light',

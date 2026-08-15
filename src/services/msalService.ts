@@ -1,7 +1,7 @@
 import { PublicClientApplication, Configuration, AccountInfo } from '@azure/msal-browser';
 import { UserProfile } from '../types';
 
-const AZURE_CLIENT_ID_KEY = 'leitor_html_azure_client_id';
+const AZURE_CLIENT_ID_KEY = 'leitor_md_azure_client_id';
 const DEFAULT_CLIENT_ID = '00000000-0000-0000-0000-000000000000'; // Default placeholder, editable by user in Settings
 
 export function getStoredClientId(): string {

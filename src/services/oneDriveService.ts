@@ -25,12 +25,12 @@ export async function listOneDriveItems(folderId?: string): Promise<OneDriveItem
   const data = await response.json();
   const items: OneDriveItem[] = data.value || [];
 
-  // Filter only folders and .html/.htm files
+  // Filter only folders and .md files
   return items.filter((item) => {
     if (item.folder) return true;
     if (item.file) {
       const name = item.name.toLowerCase();
-      return name.endsWith('.html') || name.endsWith('.htm');
+      return name.endsWith('.md') || name.endsWith('.markdown') || name.endsWith('.txt');
     }
     return false;
   });
@@ -55,7 +55,7 @@ export async function downloadOneDriveFile(fileId: string): Promise<string> {
 }
 
 /**
- * Overwrites an existing file in OneDrive with new HTML content.
+ * Overwrites an existing file in OneDrive with new Markdown content.
  */
 export async function saveOneDriveFile(fileId: string, content: string): Promise<void> {
   const token = await getAccessToken();
@@ -63,7 +63,7 @@ export async function saveOneDriveFile(fileId: string, content: string): Promise
     method: 'PUT',
     headers: {
       Authorization: `Bearer ${token}`,
-      'Content-Type': 'text/html; charset=utf-8',
+      'Content-Type': 'text/markdown; charset=utf-8',
     },
     body: content,
   });

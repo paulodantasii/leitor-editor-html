@@ -7,6 +7,7 @@ import Subscript from '@tiptap/extension-subscript';
 import Superscript from '@tiptap/extension-superscript';
 import TextStyle from '@tiptap/extension-text-style';
 import Color from '@tiptap/extension-color';
+import { Markdown } from 'tiptap-markdown';
 
 import TextAlign from '@tiptap/extension-text-align';
 
@@ -15,7 +16,6 @@ import { CustomHighlight } from './CustomHighlight';
 import { HighlightPopover } from './HighlightPopover';
 import { EditorToolbar } from './EditorToolbar';
 import { HighlightColor } from '../../types';
-import { sanitizeHTML } from '../../services/sanitizer';
 
 /**
  * Checks if there is any unhighlighted text or space between two <mark> elements in the DOM.
@@ -40,8 +40,8 @@ function hasUnhighlightedTextBetween(m1: HTMLElement, m2: HTMLElement): boolean 
  * Checks if two <mark> DOM elements are part of a single contiguous highlight selection.
  */
 function areMarksConnected(m1: HTMLElement, m2: HTMLElement): boolean {
-  const id1 = m1.getAttribute('data-hl-id');
-  const id2 = m2.getAttribute('data-hl-id');
+  const id1 = m1.getAttribute('data-id') || m1.getAttribute('data-hl-id');
+  const id2 = m2.getAttribute('data-id') || m2.getAttribute('data-hl-id');
 
   if (id1 && id2) {
     return id1 === id2;
@@ -59,9 +59,9 @@ function areMarksConnected(m1: HTMLElement, m2: HTMLElement): boolean {
  * Finds all connected contiguous <mark> DOM elements belonging to the same highlight selection action.
  */
 function getConnectedMarkElements(markEl: HTMLElement, container: HTMLElement): HTMLElement[] {
-  const hlId = markEl.getAttribute('data-hl-id');
+  const hlId = markEl.getAttribute('data-id') || markEl.getAttribute('data-hl-id');
   if (hlId) {
-    const matchingMarks = Array.from(container.querySelectorAll(`mark[data-hl-id="${hlId}"]`)) as HTMLElement[];
+    const matchingMarks = Array.from(container.querySelectorAll(`mark[data-id="${hlId}"], mark[data-hl-id="${hlId}"]`)) as HTMLElement[];
     if (matchingMarks.length > 0) {
       return matchingMarks;
     }
@@ -172,6 +172,32 @@ function getExactMarkRangeFromDOM(
   return null;
 }
 
+/**
+ * Cleans up Markdown by merging contiguous <mark> tags that have the same data-hl-id
+ * and are only separated by inline formatting (like **, *, _, etc.)
+ */
+function cleanUpMarkdownHighlights(markdown: string): string {
+  let previousText = "";
+  let currentText = markdown;
+
+  // Group 1: Opening <mark> with its ID
+  // Group 2: The inner content
+  // </mark>
+  // Group 3: Inline formatting characters (spaces, asterisks, underscores, tildes, backticks). No newlines allowed!
+  // <mark... id="\2"> : Next opening <mark> MUST have the same exact ID.
+  // Works with both data-id and data-hl-id for legacy compatibility
+  const regex = /(<mark[^>]+(?:data-id|data-hl-id)="([^"]+)"[^>]*>)([\s\S]*?)<\/mark>([ \t*_~`]*?)<mark[^>]+(?:data-id|data-hl-id)="\2"[^>]*>/g;
+
+  while (previousText !== currentText) {
+    previousText = currentText;
+    currentText = currentText.replace(regex, (match, openTag, id, innerContent, formattingBetween) => {
+      return `${openTag}${innerContent}${formattingBetween}`;
+    });
+  }
+
+  return currentText;
+}
+
 export const TiptapEditor: React.FC = () => {
   const {
     document: currentDoc,
@@ -221,7 +247,7 @@ export const TiptapEditor: React.FC = () => {
       let legacyGroupCount = 0;
 
       for (let i = 0; i < allMarks.length; i++) {
-        const hlId = allMarks[i].getAttribute('data-hl-id');
+        const hlId = allMarks[i].getAttribute('data-id') || allMarks[i].getAttribute('data-hl-id');
         if (hlId) {
           uniqueIds.add(hlId);
         } else if (i === 0 || !areMarksConnected(allMarks[i - 1], allMarks[i])) {
@@ -255,12 +281,18 @@ export const TiptapEditor: React.FC = () => {
       TextStyle,
       Color,
       CustomHighlight,
+      Markdown.configure({
+        html: true,
+        transformPastedText: true,
+      }),
     ],
-    content: sanitizeHTML(currentDoc.content),
+    content: currentDoc.content,
     editable: isEditable,
     onUpdate: ({ editor }) => {
-      const html = editor.getHTML();
-      updateDocumentContent(html);
+      const rawMarkdown = editor.storage.markdown.getMarkdown();
+      const cleanMarkdown = cleanUpMarkdownHighlights(rawMarkdown);
+      
+      updateDocumentContent(cleanMarkdown);
       updateHighlightCount(editor);
     },
     onSelectionUpdate: ({ editor }) => {
@@ -286,7 +318,7 @@ export const TiptapEditor: React.FC = () => {
         highlightTimeoutRef.current = setTimeout(() => {
           const currentSel = editor.state.selection;
           if (currentSel.from !== currentSel.to) {
-            const uniqueId = `hl-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+            const uniqueId = Math.random().toString(36).substring(2, 6);
 
             editor
               .chain()
@@ -341,7 +373,7 @@ export const TiptapEditor: React.FC = () => {
 
       let markEl: HTMLElement | null = null;
       if (targetMarkId) {
-        markEl = containerRef.current.querySelector(`mark[data-hl-id="${targetMarkId}"]`);
+        markEl = containerRef.current.querySelector(`mark[data-id="${targetMarkId}"], mark[data-hl-id="${targetMarkId}"]`);
       }
 
       if (!markEl) {
@@ -383,7 +415,7 @@ export const TiptapEditor: React.FC = () => {
       if (markEl && editor && containerRef.current) {
         e.stopPropagation();
 
-        const hlId = markEl.getAttribute('data-hl-id');
+        const hlId = markEl.getAttribute('data-id') || markEl.getAttribute('data-hl-id');
         setTargetMarkId(hlId);
 
         const connectedMarks = getConnectedMarkElements(markEl, containerRef.current);
@@ -408,7 +440,7 @@ export const TiptapEditor: React.FC = () => {
 
         // Detect current color of clicked mark
         const dataColor = markEl.getAttribute('data-color') as HighlightColor;
-        const classMatch = markEl.className.match(/hl-(\w+)/);
+        const classMatch = markEl.className.match(/\b(yellow|blue|red|pink|green|purple|orange|gray)\b/) || markEl.className.match(/hl-(\w+)/);
         const color = dataColor || (classMatch ? (classMatch[1] as HighlightColor) : 'yellow');
         setActiveHighlightColor(color);
 
@@ -465,8 +497,8 @@ export const TiptapEditor: React.FC = () => {
 
   // Update content when document changes externally
   useEffect(() => {
-    if (editor && currentDoc.content && editor.getHTML() !== currentDoc.content) {
-      editor.commands.setContent(sanitizeHTML(currentDoc.content), false);
+    if (editor && currentDoc.content && editor.storage.markdown.getMarkdown() !== currentDoc.content) {
+      editor.commands.setContent(currentDoc.content, false);
       updateHighlightCount(editor);
     }
   }, [currentDoc.content, editor, updateHighlightCount]);
@@ -503,7 +535,7 @@ export const TiptapEditor: React.FC = () => {
           clearTimeout(highlightTimeoutRef.current);
         }
 
-        const uniqueId = `hl-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+        const uniqueId = Math.random().toString(36).substring(2, 6);
 
         // Apply highlight and advance ProseMirror selection to release WebKit anchor
         editor
@@ -568,7 +600,7 @@ export const TiptapEditor: React.FC = () => {
         ? { from: editor.state.selection.from, to: editor.state.selection.to }
         : null);
 
-    const existingId = targetMarkId || `hl-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+    const existingId = targetMarkId || Math.random().toString(36).substring(2, 6);
 
     if (range) {
       editor

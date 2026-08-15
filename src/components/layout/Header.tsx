@@ -1,8 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { useAppStore } from '../../store/useAppStore';
 import { AppearanceMenu } from './AppearanceMenu';
-import { downloadHTMLFile, createStandaloneHTML } from '../../services/exportService';
-import { sanitizeHTML } from '../../services/sanitizer';
+import { downloadMarkdownFile } from '../../services/exportService';
 import {
   Highlighter,
   Edit3,
@@ -70,8 +69,8 @@ export const Header: React.FC = () => {
     }
     setFileHandle(null);
     setDocument({
-      title: 'Sem Título',
-      content: '<p></p>',
+      title: 'Sem Título.md',
+      content: '',
       oneDriveItemId: null,
       lastSavedAt: new Date().toLocaleTimeString(),
       isDirty: false,
@@ -85,8 +84,8 @@ export const Header: React.FC = () => {
         const [handle] = await (window as any).showOpenFilePicker({
           types: [
             {
-              description: 'Arquivos HTML',
-              accept: { 'text/html': ['.html', '.htm'] },
+              description: 'Arquivos Markdown',
+              accept: { 'text/markdown': ['.md', '.txt'] },
             },
           ],
           multiple: false,
@@ -94,12 +93,11 @@ export const Header: React.FC = () => {
 
         const file = await handle.getFile();
         const text = await file.text();
-        const cleanHTML = sanitizeHTML(text);
 
         setFileHandle(handle);
         setDocument({
           title: file.name,
-          content: cleanHTML,
+          content: text,
           oneDriveItemId: null,
           lastSavedAt: new Date().toLocaleTimeString(),
           isDirty: false,
@@ -122,13 +120,12 @@ export const Header: React.FC = () => {
 
     const reader = new FileReader();
     reader.onload = (event) => {
-      const rawHTML = event.target?.result as string;
-      if (rawHTML) {
-        const cleanHTML = sanitizeHTML(rawHTML);
+      const rawText = event.target?.result as string;
+      if (rawText) {
         setFileHandle(null);
         setDocument({
           title: file.name,
-          content: cleanHTML,
+          content: rawText,
           oneDriveItemId: null,
           lastSavedAt: new Date().toLocaleTimeString(),
           isDirty: false,
@@ -144,13 +141,13 @@ export const Header: React.FC = () => {
 
   // Save File with iPad / Mobile Resilience
   const handleSaveFile = async () => {
-    const fullHTML = createStandaloneHTML(currentDoc.content, currentDoc.title || 'documento');
+    const contentToSave = currentDoc.content;
 
     try {
       if (fileHandle && typeof fileHandle.createWritable === 'function') {
         // Desktop direct file overwrite
         const writable = await fileHandle.createWritable();
-        await writable.write(fullHTML);
+        await writable.write(contentToSave);
         await writable.close();
 
         setDocument({ isDirty: false, lastSavedAt: new Date().toLocaleTimeString() });
@@ -158,12 +155,12 @@ export const Header: React.FC = () => {
       } else if ('showSaveFilePicker' in window) {
         // Desktop Save As Picker
         const handle = await (window as any).showSaveFilePicker({
-          suggestedName: currentDoc.title || 'documento_grifado.html',
-          types: [{ description: 'Arquivo HTML', accept: { 'text/html': ['.html'] } }],
+          suggestedName: currentDoc.title || 'documento_grifado.md',
+          types: [{ description: 'Arquivo Markdown', accept: { 'text/markdown': ['.md'] } }],
         });
 
         const writable = await handle.createWritable();
-        await writable.write(fullHTML);
+        await writable.write(contentToSave);
         await writable.close();
 
         const file = await handle.getFile();
@@ -176,14 +173,14 @@ export const Header: React.FC = () => {
         showNotification('Arquivo salvo!');
       } else {
         // iPad / Mobile Fallback: Triggers iOS "Save to Files" prompt
-        downloadHTMLFile(currentDoc.content, currentDoc.title || 'documento.html');
+        downloadMarkdownFile(contentToSave, currentDoc.title || 'documento.md');
         setDocument({ isDirty: false, lastSavedAt: new Date().toLocaleTimeString() });
         showNotification('Salvo no dispositivo!');
       }
     } catch (err: any) {
       if (err.name !== 'AbortError') {
         // Mobile fallback if picker fails or is restricted by iOS Safari
-        downloadHTMLFile(currentDoc.content, currentDoc.title || 'documento.html');
+        downloadMarkdownFile(contentToSave, currentDoc.title || 'documento.md');
         setDocument({ isDirty: false, lastSavedAt: new Date().toLocaleTimeString() });
         showNotification('Salvo no dispositivo!');
       }
@@ -198,9 +195,9 @@ export const Header: React.FC = () => {
     }, 3000);
   };
 
-  // Export Standalone HTML Copy
-  const handleExportHTML = () => {
-    downloadHTMLFile(currentDoc.content, currentDoc.title || 'documento.html');
+  // Export Standalone MD Copy
+  const handleExportMD = () => {
+    downloadMarkdownFile(currentDoc.content, currentDoc.title || 'documento.md');
   };
 
   return (
@@ -279,7 +276,7 @@ export const Header: React.FC = () => {
             <input
               ref={fileInputRef}
               type="file"
-              accept=".html,.htm"
+              accept=".md,.markdown,.txt"
               className="hidden"
               onChange={handleFileUploadFallback}
             />
@@ -296,7 +293,7 @@ export const Header: React.FC = () => {
             {/* Botão Abrir */}
             <button
               onClick={handleOpenFile}
-              title="Abrir arquivo HTML local"
+              title="Abrir arquivo Markdown local"
               className="px-3 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center gap-1.5 text-xs font-medium transition-colors"
             >
               <FolderOpen className="w-4 h-4 text-blue-500" /> Abrir
@@ -312,8 +309,8 @@ export const Header: React.FC = () => {
 
             {/* Botão Exportar (Baixar nova cópia) */}
             <button
-              onClick={handleExportHTML}
-              title="Baixar nova cópia standalone com grifos"
+              onClick={handleExportMD}
+              title="Baixar nova cópia Markdown com grifos"
               className="px-3 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center gap-1.5 text-xs font-medium transition-colors"
             >
               <Download className="w-4 h-4 text-purple-500" /> Exportar
@@ -383,7 +380,7 @@ export const Header: React.FC = () => {
                 </button>
                 <button
                   onClick={() => {
-                    handleExportHTML();
+                    handleExportMD();
                     setIsMobileMenuOpen(false);
                   }}
                   className="w-full p-2 text-left text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg flex items-center gap-2"

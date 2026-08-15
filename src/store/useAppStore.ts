@@ -61,7 +61,7 @@ const getInitialDoc = (): DocumentState => {
   const hasSession = typeof sessionStorage !== 'undefined' && sessionStorage.getItem('has_active_session');
   if (hasSession) {
     return loadLocalDocument() || {
-      title: 'Constituição Federal - Amostra Vade Mecum.html',
+      title: 'Constituição Federal - Amostra Vade Mecum.md',
       content: SAMPLE_LEGISLATION_DOC,
       oneDriveItemId: null,
       lastSavedAt: null,
@@ -69,8 +69,8 @@ const getInitialDoc = (): DocumentState => {
     };
   }
   return {
-    title: 'Novo Documento',
-    content: '<p></p>',
+    title: 'Novo Documento.md',
+    content: '',
     oneDriveItemId: null,
     lastSavedAt: null,
     isDirty: false,
@@ -132,7 +132,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
   loadCachedDocument: () => {
     const cached = loadLocalDocument() || {
-      title: 'Constituição Federal - Amostra Vade Mecum.html',
+      title: 'Constituição Federal - Amostra Vade Mecum.md',
       content: SAMPLE_LEGISLATION_DOC,
       oneDriveItemId: null,
       lastSavedAt: null,

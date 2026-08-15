@@ -1,7 +1,6 @@
 import React from 'react';
 import { useAppStore } from '../../store/useAppStore';
 import { Highlighter, History, FolderOpen, FileText, FilePlus, Cloud } from 'lucide-react';
-import { sanitizeHTML } from '../../services/sanitizer';
 
 interface WelcomeScreenProps {
   onContinueLast: () => void;
@@ -17,8 +16,8 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onContinueLast, on
         const [handle] = await (window as any).showOpenFilePicker({
           types: [
             {
-              description: 'Arquivos HTML',
-              accept: { 'text/html': ['.html', '.htm'] },
+              description: 'Arquivos Markdown',
+              accept: { 'text/markdown': ['.md', '.markdown', '.txt'] },
             },
           ],
           multiple: false,
@@ -26,12 +25,11 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onContinueLast, on
 
         const file = await handle.getFile();
         const text = await file.text();
-        const cleanHTML = sanitizeHTML(text);
 
         setFileHandle(handle);
         setDocument({
           title: file.name,
-          content: cleanHTML,
+          content: text,
           oneDriveItemId: null,
           lastSavedAt: new Date().toLocaleTimeString(),
           isDirty: false,
@@ -41,19 +39,18 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onContinueLast, on
         // Fallback file input
         const input = document.createElement('input');
         input.type = 'file';
-        input.accept = '.html,.htm';
+        input.accept = '.md,.markdown,.txt';
         input.onchange = (e: any) => {
           const file = e.target?.files?.[0];
           if (file) {
             const reader = new FileReader();
             reader.onload = (event) => {
-              const rawHTML = event.target?.result as string;
-              if (rawHTML) {
-                const cleanHTML = sanitizeHTML(rawHTML);
+              const rawText = event.target?.result as string;
+              if (rawText) {
                 setFileHandle(null);
                 setDocument({
                   title: file.name,
-                  content: cleanHTML,
+                  content: rawText,
                   oneDriveItemId: null,
                   lastSavedAt: new Date().toLocaleTimeString(),
                   isDirty: false,
@@ -76,8 +73,8 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onContinueLast, on
   const handleStartBlankDoc = () => {
     setFileHandle(null);
     setDocument({
-      title: 'Sem Título',
-      content: '<p></p>',
+      title: 'Sem Título.md',
+      content: '',
       oneDriveItemId: null,
       lastSavedAt: new Date().toLocaleTimeString(),
       isDirty: false,
@@ -99,7 +96,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onContinueLast, on
         </div>
 
         <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-800 dark:text-slate-100 mb-2">
-          Leitor & Editor de HTML
+          Leitor & Editor de Markdown
         </h1>
         <p className="text-sm sm:text-base text-slate-500 dark:text-slate-400 mb-8 max-w-md">
           Como você gostaria de começar sua sessão de leitura e edição hoje?
@@ -145,7 +142,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onContinueLast, on
                 Abrir Arquivo
               </h2>
               <p className="text-xs text-slate-500 dark:text-slate-400">
-                Selecionar um arquivo .html do seu dispositivo
+                Selecionar um arquivo .md do seu dispositivo
               </p>
             </div>
 

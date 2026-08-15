@@ -4,7 +4,6 @@ import { loginWithOneDrive, logoutOneDrive, getActiveAccount } from '../../servi
 import { listOneDriveItems, downloadOneDriveFile, saveOneDriveFile } from '../../services/oneDriveService';
 import { OneDriveItem } from '../../types';
 import { X, Cloud, Folder, FileCode, LogIn, LogOut, RefreshCw, UploadCloud, ChevronRight, Settings } from 'lucide-react';
-import { sanitizeHTML } from '../../services/sanitizer';
 
 export const OneDriveModal: React.FC = () => {
   const {
@@ -110,12 +109,11 @@ export const OneDriveModal: React.FC = () => {
   const handleOpenFile = async (file: OneDriveItem) => {
     setIsLoading(true);
     try {
-      const rawHTML = await downloadOneDriveFile(file.id);
-      const cleanHTML = sanitizeHTML(rawHTML);
+      const rawText = await downloadOneDriveFile(file.id);
 
       setDocument({
         title: file.name,
-        content: cleanHTML,
+        content: rawText,
         oneDriveItemId: file.id,
         lastSavedAt: new Date().toLocaleTimeString(),
         isDirty: false,
@@ -270,7 +268,7 @@ export const OneDriveModal: React.FC = () => {
                 </div>
               ) : items.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-48 text-slate-400 text-xs">
-                  Nenhum arquivo .html / .htm encontrado nesta pasta.
+                  Nenhum arquivo .md / .txt encontrado nesta pasta.
                 </div>
               ) : (
                 items.map((item) => (
@@ -294,7 +292,7 @@ export const OneDriveModal: React.FC = () => {
                             ? `${item.folder.childCount || 0} itens`
                             : item.size
                             ? `${Math.round(item.size / 1024)} KB`
-                            : 'Arquivo HTML'}
+                            : 'Arquivo Markdown'}
                         </p>
                       </div>
                     </div>

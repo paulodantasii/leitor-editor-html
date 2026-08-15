@@ -44,24 +44,23 @@ export const CustomHighlight = Mark.create<CustomHighlightOptions>({
           if (dataColor) return dataColor;
 
           const className = element.getAttribute('class') || '';
-          const match = className.match(/hl-(\w+)/);
+          const match = className.match(/\b(yellow|blue|red|pink|green|purple|orange|gray)\b/) || className.match(/hl-(\w+)/);
           return match ? match[1] : 'yellow';
         },
         renderHTML: (attributes) => {
           const color = attributes.color || 'yellow';
           return {
-            class: `hl-${color}`,
-            'data-color': color,
+            class: color,
           };
         },
       },
       id: {
         default: null,
-        parseHTML: (element) => element.getAttribute('data-hl-id') || element.getAttribute('id'),
+        parseHTML: (element) => element.getAttribute('data-id') || element.getAttribute('data-hl-id') || element.getAttribute('id'),
         renderHTML: (attributes) => {
           if (!attributes.id) return {};
           return {
-            'data-hl-id': attributes.id,
+            'data-id': attributes.id,
           };
         },
       },
@@ -86,7 +85,7 @@ export const CustomHighlight = Mark.create<CustomHighlightOptions>({
         (attributes) =>
         ({ commands }) => {
           const attrs = {
-            id: attributes?.id || `hl-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+            id: attributes?.id || Math.random().toString(36).substring(2, 6),
             color: attributes?.color || 'yellow',
           };
           return commands.setMark(this.name, attrs);
@@ -95,7 +94,7 @@ export const CustomHighlight = Mark.create<CustomHighlightOptions>({
         (attributes) =>
         ({ commands }) => {
           const attrs = {
-            id: attributes?.id || `hl-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+            id: attributes?.id || Math.random().toString(36).substring(2, 6),
             color: attributes?.color || 'yellow',
           };
           return commands.toggleMark(this.name, attrs);
