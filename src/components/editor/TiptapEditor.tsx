@@ -99,6 +99,53 @@ function getConnectedMarkElements(markEl: HTMLElement, container: HTMLElement): 
 }
 
 /**
+ * Helper to update boundary classes on an element without redundant DOM writes.
+ */
+function setMarkBoundaryClass(el: HTMLElement, cls: 'hl-single' | 'hl-start' | 'hl-middle' | 'hl-end') {
+  const classes: Array<'hl-single' | 'hl-start' | 'hl-middle' | 'hl-end'> = ['hl-single', 'hl-start', 'hl-middle', 'hl-end'];
+  classes.forEach((c) => {
+    if (c === cls) {
+      if (!el.classList.contains(c)) el.classList.add(c);
+    } else {
+      if (el.classList.contains(c)) el.classList.remove(c);
+    }
+  });
+}
+
+/**
+ * Automatically assigns start/middle/end classes to connected mark DOM elements
+ * so that only outer extremities get rounded corners, while internal junctions remain flat and seamless.
+ */
+function syncMarkBoundaries(container: HTMLElement) {
+  if (!container) return;
+  const marks = Array.from(container.querySelectorAll('mark')) as HTMLElement[];
+  if (marks.length === 0) return;
+
+  const processed = new Set<HTMLElement>();
+
+  for (const mark of marks) {
+    if (processed.has(mark)) continue;
+    const connected = getConnectedMarkElements(mark, container);
+    connected.forEach((m) => processed.add(m));
+
+    if (connected.length === 1) {
+      setMarkBoundaryClass(connected[0], 'hl-single');
+    } else {
+      connected.forEach((m, idx) => {
+        if (idx === 0) {
+          setMarkBoundaryClass(m, 'hl-start');
+        } else if (idx === connected.length - 1) {
+          setMarkBoundaryClass(m, 'hl-end');
+        } else {
+          setMarkBoundaryClass(m, 'hl-middle');
+        }
+      });
+    }
+  }
+}
+
+
+/**
  * Accurately finds the complete contiguous text range [from, to] of a customHighlight mark
  * by inspecting parent block children in ProseMirror.
  */
@@ -495,11 +542,36 @@ export const TiptapEditor: React.FC = () => {
     };
   }, [editor, setActiveHighlightColor]);
 
+  // Keep mark boundary classes synchronized on render / content updates
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    syncMarkBoundaries(container);
+
+    const observer = new MutationObserver(() => {
+      syncMarkBoundaries(container);
+    });
+
+    observer.observe(container, {
+      childList: true,
+      subtree: true,
+      characterData: true,
+    });
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [editor, currentDoc.oneDriveItemId, currentDoc.content]);
+
   // Update content when document changes externally
   useEffect(() => {
     if (editor && currentDoc.content && editor.storage.markdown.getMarkdown() !== currentDoc.content) {
       editor.commands.setContent(currentDoc.content, false);
       updateHighlightCount(editor);
+      if (containerRef.current) {
+        syncMarkBoundaries(containerRef.current);
+      }
     }
   }, [currentDoc.content, editor, updateHighlightCount]);
 
