@@ -32,12 +32,12 @@
 
 /* Custom Highlight Mark Styling (Pastel colors) */
 mark {
-  background-color: transparent;
+  background-color: #fef08a;
   color: inherit;
-  border-radius: 2px;
-  padding: 2px 0px;
+  border-radius: 3px;
+  padding: 0.1em 0;
   margin: 0;
-  transition: all 0.2s ease;
+  transition: all 0.15s ease-in-out;
   cursor: pointer;
   box-decoration-break: clone;
   -webkit-box-decoration-break: clone;
