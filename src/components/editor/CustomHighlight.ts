@@ -27,6 +27,7 @@ declare module '@tiptap/core' {
 
 export const CustomHighlight = Mark.create<CustomHighlightOptions>({
   name: 'customHighlight',
+  priority: 1001,
 
   addOptions() {
     return {

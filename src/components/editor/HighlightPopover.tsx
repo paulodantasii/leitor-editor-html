@@ -13,7 +13,6 @@ export const HIGHLIGHT_COLORS: HighlightColorOption[] = [
 ];
 
 interface HighlightPopoverProps {
-  position: { x: number; y: number } | null;
   activeColor?: HighlightColor;
   onSelectColor: (color: HighlightColor) => void;
   onRemoveHighlight: () => void;
@@ -21,32 +20,29 @@ interface HighlightPopoverProps {
 }
 
 export const HighlightPopover: React.FC<HighlightPopoverProps> = ({
-  position,
   activeColor,
   onSelectColor,
   onRemoveHighlight,
 }) => {
-  if (!position) return null;
-
   return (
     <div
       data-highlight-popover="true"
-      className="absolute z-20 transform -translate-x-1/2 -translate-y-full mb-2 bg-white dark:bg-slate-800 rounded-full shadow-xl border border-slate-200 dark:border-slate-700 px-3 py-1.5 flex items-center gap-1.5 pointer-events-auto select-none"
-      style={{
-        left: `${position.x}px`,
-        top: `${position.y}px`,
+      className="bg-white dark:bg-slate-800 rounded-full shadow-xl border border-slate-200 dark:border-slate-700 px-3 py-1.5 flex items-center gap-1.5 pointer-events-auto select-none"
+      onMouseDown={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
       }}
-      onClick={(e) => e.stopPropagation()}
-      onMouseDown={(e) => e.stopPropagation()}
     >
       <div className="flex items-center gap-1.5 pr-2 border-r border-slate-200 dark:border-slate-700">
         {HIGHLIGHT_COLORS.map((c) => (
           <button
             key={c.id}
             onClick={(e) => {
+              e.preventDefault();
               e.stopPropagation();
               onSelectColor(c.id);
             }}
+            onMouseDown={(e) => e.preventDefault()}
             title={`Grifar de ${c.name}`}
             className={`w-6 h-6 rounded-full transition-transform hover:scale-110 active:scale-95 ${c.bgClass} ${
               activeColor === c.id ? 'ring-2 ring-blue-500 ring-offset-1 dark:ring-offset-slate-800 scale-110' : ''
@@ -57,9 +53,11 @@ export const HighlightPopover: React.FC<HighlightPopoverProps> = ({
 
       <button
         onClick={(e) => {
+          e.preventDefault();
           e.stopPropagation();
           onRemoveHighlight();
         }}
+        onMouseDown={(e) => e.preventDefault()}
         title="Remover grifo"
         className="p-1.5 rounded-full text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors"
       >

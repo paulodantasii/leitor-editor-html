@@ -44,22 +44,11 @@ mark {
   display: inline;
 }
 
-/* Seamless Rounded Corners on Outer Extremities Only */
-mark.hl-single {
-  border-radius: 4px;
+.editor-mode-active mark {
+  cursor: text;
 }
 
-mark.hl-start {
-  border-radius: 4px 0 0 4px;
-}
 
-mark.hl-middle {
-  border-radius: 0;
-}
-
-mark.hl-end {
-  border-radius: 0 4px 4px 0;
-}
 
 /* Synchronized Hover effect for unified highlight blocks */
 mark.mark-hovered {

@@ -254,15 +254,6 @@ export const Header: React.FC = () => {
             >
               {highlightCount}
             </span>
-            <kbd
-              className={`hidden sm:inline-block text-[9px] font-mono px-1 py-0.2 rounded border ${
-                isHighlightMode
-                  ? 'bg-amber-600/60 border-amber-400/40 text-amber-100'
-                  : 'bg-slate-200/70 dark:bg-slate-700/70 border-slate-300/50 dark:border-slate-600/50 text-slate-500 dark:text-slate-400'
-              }`}
-            >
-              G
-            </kbd>
           </button>
 
           {/* Modo Leitura / Edição Toggle */}
