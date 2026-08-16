@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useEditor, EditorContent, Editor, BubbleMenu } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Image from '@tiptap/extension-image';
@@ -29,6 +29,15 @@ export const TiptapEditor: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const isMouseDownRef = useRef(false);
   const highlightTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // State to control popover visibility: only opens on explicit click on a highlight mark
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const isPopoverOpenRef = useRef(false);
+
+  const setPopoverOpen = useCallback((open: boolean) => {
+    isPopoverOpenRef.current = open;
+    setIsPopoverOpen(open);
+  }, []);
 
   // Track global mouse down state for PC dragging
   useEffect(() => {
@@ -101,7 +110,7 @@ export const TiptapEditor: React.FC = () => {
 
       const { from, to } = editor.state.selection;
 
-      // Case A: User selected a text range in Highlight Mode -> APPLY HIGHLIGHT
+      // Case A: User selected a text range in Highlight Mode -> APPLY HIGHLIGHT (Yellow standard, no popover)
       if (isHighlightMode && !editor.isDestroyed && from !== to) {
         // Prevent instant highlight while dragging on PC
         if (isMouseDownRef.current) return;
@@ -115,6 +124,8 @@ export const TiptapEditor: React.FC = () => {
           const currentSel = editor.state.selection;
           if (currentSel.from !== currentSel.to) {
             const uniqueId = Math.random().toString(36).substring(2, 6);
+
+            setPopoverOpen(false);
 
             editor
               .chain()
@@ -150,8 +161,11 @@ export const TiptapEditor: React.FC = () => {
   useEffect(() => {
     if (editor) {
       editor.setEditable(isEditable);
+      if (isEditable) {
+        setPopoverOpen(false);
+      }
     }
-  }, [isEditable, editor]);
+  }, [isEditable, editor, setPopoverOpen]);
 
   // Handle native selection in Highlight mode & iPad context menu suppression
   useEffect(() => {
@@ -172,6 +186,8 @@ export const TiptapEditor: React.FC = () => {
         }
 
         const uniqueId = Math.random().toString(36).substring(2, 6);
+
+        setPopoverOpen(false);
 
         editor
           .chain()
@@ -212,7 +228,7 @@ export const TiptapEditor: React.FC = () => {
         container.removeEventListener('contextmenu', handleContextMenu);
       }
     };
-  }, [editor, isHighlightMode, isEditable, updateHighlightCount]);
+  }, [editor, isHighlightMode, isEditable, updateHighlightCount, setPopoverOpen]);
 
   // Handle click on marks (activate popover) vs click outside marks (deactivate popover)
   useEffect(() => {
@@ -233,7 +249,8 @@ export const TiptapEditor: React.FC = () => {
         try {
           const textNode = markEl.firstChild || markEl;
           const pos = editor.view.posAtDOM(textNode, 0);
-          if (pos >= 0) {
+          if (pos >= 0 && pos < editor.state.doc.content.size) {
+            setPopoverOpen(true);
             editor.commands.setTextSelection(pos + 1);
             return;
           }
@@ -243,7 +260,8 @@ export const TiptapEditor: React.FC = () => {
       }
 
       // Clicked outside any mark (normal arrow cursor) -> deactivate popover if active
-      if (editor.isActive('customHighlight')) {
+      if (isPopoverOpenRef.current || editor.isActive('customHighlight')) {
+        setPopoverOpen(false);
         let clearPos = -1;
         editor.state.doc.descendants((node, pos) => {
           if (clearPos !== -1) return false;
@@ -268,7 +286,7 @@ export const TiptapEditor: React.FC = () => {
       document.removeEventListener('mousedown', handlePointerDown);
       document.removeEventListener('touchstart', handlePointerDown);
     };
-  }, [editor, isEditable]);
+  }, [editor, isEditable, setPopoverOpen]);
 
   // Initial highlight count on mount
   useEffect(() => {
@@ -308,6 +326,8 @@ export const TiptapEditor: React.FC = () => {
     
     if (highlightTimeoutRef.current) clearTimeout(highlightTimeoutRef.current);
     
+    setPopoverOpen(false);
+
     // Clear selection away from highlight so popover closes
     let clearPos = -1;
     editor.state.doc.descendants((node, pos) => {
@@ -354,6 +374,8 @@ export const TiptapEditor: React.FC = () => {
     
     if (highlightTimeoutRef.current) clearTimeout(highlightTimeoutRef.current);
     
+    setPopoverOpen(false);
+
     // Clear selection away from highlight so popover closes
     let clearPos = -1;
     editor.state.doc.descendants((node, pos) => {
@@ -397,13 +419,13 @@ export const TiptapEditor: React.FC = () => {
           <BubbleMenu 
             editor={editor} 
             tippyOptions={{ duration: 100 }}
-            shouldShow={({ editor }) => !isEditable && editor.isActive('customHighlight')}
+            shouldShow={({ editor }) => !isEditable && isPopoverOpenRef.current && editor.isActive('customHighlight')}
           >
             <HighlightPopover
               activeColor={editor.getAttributes('customHighlight').color as HighlightColor}
               onSelectColor={handleSelectColor}
               onRemoveHighlight={handleRemoveHighlight}
-              onClose={() => {}}
+              onClose={() => setPopoverOpen(false)}
             />
           </BubbleMenu>
         )}
