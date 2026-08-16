@@ -1,10 +1,14 @@
-import React from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { Editor } from '@tiptap/react';
 import {
   Bold,
   Italic,
   Underline as UnderlineIcon,
   Strikethrough,
+  Highlighter,
+  Trash2,
+  ChevronDown,
   Heading1,
   Heading2,
   Heading3,
@@ -24,13 +28,136 @@ import {
   Redo,
   RemoveFormatting,
 } from 'lucide-react';
+import { HighlightColor } from '../../types';
+import { HIGHLIGHT_COLORS } from './HighlightPopover';
 
 interface EditorToolbarProps {
   editor: Editor | null;
 }
 
+const COLOR_BAR_MAP: Record<HighlightColor, string> = {
+  yellow: 'bg-amber-400',
+  blue: 'bg-sky-400',
+  red: 'bg-red-400',
+  pink: 'bg-pink-400',
+  green: 'bg-emerald-400',
+  purple: 'bg-purple-400',
+  orange: 'bg-orange-400',
+  gray: 'bg-slate-400',
+};
+
 export const EditorToolbar: React.FC<EditorToolbarProps> = ({ editor }) => {
+  const [isHighlightMenuOpen, setIsHighlightMenuOpen] = useState(false);
+  const [menuCoords, setMenuCoords] = useState<{ top: number; left: number } | null>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const highlightMenuRef = useRef<HTMLDivElement>(null);
+
+  const updateMenuPosition = useCallback(() => {
+    if (buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      setMenuCoords({
+        top: rect.bottom + 8,
+        left: rect.left + rect.width / 2,
+      });
+    }
+  }, []);
+
+  // Update position and handle scroll/resize when open
+  useEffect(() => {
+    if (isHighlightMenuOpen) {
+      updateMenuPosition();
+      window.addEventListener('scroll', updateMenuPosition, true);
+      window.addEventListener('resize', updateMenuPosition);
+    }
+    return () => {
+      window.removeEventListener('scroll', updateMenuPosition, true);
+      window.removeEventListener('resize', updateMenuPosition);
+    };
+  }, [isHighlightMenuOpen, updateMenuPosition]);
+
+  // Close highlight dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        highlightMenuRef.current &&
+        !highlightMenuRef.current.contains(e.target as Node) &&
+        buttonRef.current &&
+        !buttonRef.current.contains(e.target as Node)
+      ) {
+        setIsHighlightMenuOpen(false);
+      }
+    };
+    if (isHighlightMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isHighlightMenuOpen]);
+
   if (!editor) return null;
+
+  const isCustomHighlightActive = editor.isActive('customHighlight');
+  const activeHighlightColor = (editor.getAttributes('customHighlight')?.color as HighlightColor) || 'yellow';
+
+  const handleSetHighlight = (color: HighlightColor) => {
+    const { from, to } = editor.state.selection;
+    const attrs = editor.getAttributes('customHighlight');
+    const existingId = attrs.id;
+
+    if (from === to && existingId) {
+      // Cursor is collapsed inside an existing highlight -> update all parts of this highlight entity
+      const { tr } = editor.state;
+      let modified = false;
+      tr.doc.descendants((node, pos) => {
+        if (!node.isText) return;
+        const mark = node.marks.find(
+          (m) => m.type.name === 'customHighlight' && m.attrs.id === existingId
+        );
+        if (mark) {
+          tr.removeMark(pos, pos + node.nodeSize, mark.type);
+          const newMark = mark.type.create({ ...mark.attrs, color });
+          tr.addMark(pos, pos + node.nodeSize, newMark);
+          modified = true;
+        }
+      });
+      if (modified) {
+        editor.view.dispatch(tr);
+      }
+    } else {
+      const newId = existingId || Math.random().toString(36).substring(2, 6);
+      editor.chain().focus().setCustomHighlight({ color, id: newId }).run();
+    }
+    setIsHighlightMenuOpen(false);
+  };
+
+  const handleRemoveHighlight = () => {
+    const { from, to } = editor.state.selection;
+    const attrs = editor.getAttributes('customHighlight');
+    const existingId = attrs.id;
+
+    if (from === to && existingId) {
+      // Cursor is collapsed inside an existing highlight -> remove all parts of this entity
+      const { tr } = editor.state;
+      let modified = false;
+      tr.doc.descendants((node, pos) => {
+        if (!node.isText) return;
+        const mark = node.marks.find(
+          (m) => m.type.name === 'customHighlight' && m.attrs.id === existingId
+        );
+        if (mark) {
+          tr.removeMark(pos, pos + node.nodeSize, mark.type);
+          modified = true;
+        }
+      });
+      if (modified) {
+        editor.view.dispatch(tr);
+      }
+    } else {
+      editor.chain().focus().unsetCustomHighlight().run();
+    }
+    setIsHighlightMenuOpen(false);
+  };
 
   // Custom Paragraph/ListItem Indentation
   const handleIndent = () => {
@@ -52,8 +179,8 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({ editor }) => {
 
   return (
     <div className="sticky top-[calc(4rem+env(safe-area-inset-top,0px))] z-20 my-3 flex justify-center w-full animate-in fade-in slide-in-from-top-3 duration-200">
-      <div className="bg-white/95 dark:bg-slate-800/95 backdrop-blur-md border border-slate-200 dark:border-slate-700/80 shadow-lg rounded-2xl p-1.5 flex flex-wrap items-center justify-center gap-1 max-w-full overflow-x-auto">
-        {/* Formatting Marks: Bold, Italic, Underline, Strike */}
+      <div className="bg-white/95 dark:bg-slate-800/95 backdrop-blur-md border border-slate-200 dark:border-slate-700/80 shadow-lg rounded-2xl p-1.5 flex flex-wrap items-center justify-center gap-1 max-w-full">
+        {/* Formatting Marks: Bold, Italic, Underline, Strike, Highlighter */}
         <div className="flex items-center gap-0.5 pr-1.5 border-r border-slate-200 dark:border-slate-700">
           <button
             type="button"
@@ -98,6 +225,78 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({ editor }) => {
           >
             <Strikethrough className="w-4 h-4" />
           </button>
+
+          {/* Highlight Color Picker & Remove Tool */}
+          <div className="relative">
+            <button
+              ref={buttonRef}
+              type="button"
+              onClick={() => setIsHighlightMenuOpen((prev) => !prev)}
+              className={`p-1.5 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors flex items-center gap-0.5 relative ${
+                isCustomHighlightActive || isHighlightMenuOpen
+                  ? 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 font-bold'
+                  : ''
+              }`}
+              title="Cor de Destaque / Grifar"
+            >
+              <div className="relative flex flex-col items-center">
+                <Highlighter className="w-4 h-4" />
+                {isCustomHighlightActive && (
+                  <span
+                    className={`absolute -bottom-1 w-3 h-0.5 rounded-full ${
+                      COLOR_BAR_MAP[activeHighlightColor] || 'bg-amber-400'
+                    }`}
+                  />
+                )}
+              </div>
+              <ChevronDown className="w-3 h-3 opacity-60 ml-0.5" />
+            </button>
+
+            {isHighlightMenuOpen && menuCoords && createPortal(
+              <div
+                ref={highlightMenuRef}
+                style={{
+                  position: 'fixed',
+                  top: `${menuCoords.top}px`,
+                  left: `${menuCoords.left}px`,
+                  transform: 'translateX(-50%)',
+                }}
+                onMouseDown={(e) => {
+                  // Prevent losing editor selection when interacting with popover
+                  e.preventDefault();
+                }}
+                className="z-50 bg-white dark:bg-slate-800 rounded-full shadow-2xl border border-slate-200 dark:border-slate-700 px-3 py-1.5 flex items-center gap-1.5 animate-in fade-in zoom-in-95 duration-150 select-none whitespace-nowrap pointer-events-auto"
+              >
+                <div className="flex items-center gap-1.5 pr-2 border-r border-slate-200 dark:border-slate-700">
+                  {HIGHLIGHT_COLORS.map((c) => (
+                    <button
+                      key={c.id}
+                      type="button"
+                      onClick={() => handleSetHighlight(c.id)}
+                      onMouseDown={(e) => e.preventDefault()}
+                      title={`Grifar de ${c.name}`}
+                      className={`w-6 h-6 rounded-full transition-transform hover:scale-110 active:scale-95 ${c.bgClass} ${
+                        isCustomHighlightActive && activeHighlightColor === c.id
+                          ? 'ring-2 ring-blue-500 ring-offset-1 dark:ring-offset-slate-800 scale-110'
+                          : ''
+                      }`}
+                    />
+                  ))}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleRemoveHighlight}
+                  onMouseDown={(e) => e.preventDefault()}
+                  title="Remover grifo"
+                  className="p-1.5 rounded-full text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>,
+              document.body
+            )}
+          </div>
         </div>
 
         {/* Headings: H1, H2, H3 */}
