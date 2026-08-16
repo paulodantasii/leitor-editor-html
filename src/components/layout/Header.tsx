@@ -16,6 +16,7 @@ import {
   WifiOff,
   Settings,
   FilePlus,
+  Pencil,
 } from 'lucide-react';
 
 export const Header: React.FC = () => {
@@ -39,6 +40,66 @@ export const Header: React.FC = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [saveSuccessMessage, setSaveSuccessMessage] = useState<string | null>(null);
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [editableTitle, setEditableTitle] = useState(currentDoc.title);
+  const titleInputRef = useRef<HTMLInputElement>(null);
+
+  // Sync editable title when document changes
+  useEffect(() => {
+    setEditableTitle(currentDoc.title);
+  }, [currentDoc.title]);
+
+  const handleStartRename = () => {
+    setIsEditingTitle(true);
+    setEditableTitle(currentDoc.title);
+    setTimeout(() => {
+      if (titleInputRef.current) {
+        titleInputRef.current.focus();
+        // Select filename without .md extension
+        const dotIndex = currentDoc.title.lastIndexOf('.');
+        if (dotIndex > 0) {
+          titleInputRef.current.setSelectionRange(0, dotIndex);
+        } else {
+          titleInputRef.current.select();
+        }
+      }
+    }, 20);
+  };
+
+  const handleFinishRename = () => {
+    setIsEditingTitle(false);
+    let finalTitle = editableTitle.trim();
+    if (!finalTitle) {
+      finalTitle = currentDoc.title || 'Sem Título.md';
+    } else if (
+      !finalTitle.toLowerCase().endsWith('.md') &&
+      !finalTitle.toLowerCase().endsWith('.markdown') &&
+      !finalTitle.toLowerCase().endsWith('.txt')
+    ) {
+      finalTitle = `${finalTitle}.md`;
+    }
+
+    if (finalTitle !== currentDoc.title) {
+      if (fileHandle && fileHandle.name !== finalTitle) {
+        setFileHandle(null);
+      }
+      setDocument({
+        title: finalTitle,
+        isDirty: true,
+      });
+    }
+  };
+
+  const handleTitleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleFinishRename();
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      setEditableTitle(currentDoc.title);
+      setIsEditingTitle(false);
+    }
+  };
 
   // Monitor online status for sync resilience
   useEffect(() => {
@@ -209,11 +270,31 @@ export const Header: React.FC = () => {
             <Highlighter className="w-5 h-5" />
           </div>
 
-          <div className="truncate">
+          <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <h1 className="text-sm sm:text-base font-bold text-slate-800 dark:text-slate-100 truncate">
-                {currentDoc.title}
-              </h1>
+              {isEditingTitle ? (
+                <input
+                  ref={titleInputRef}
+                  type="text"
+                  value={editableTitle}
+                  onChange={(e) => setEditableTitle(e.target.value)}
+                  onBlur={handleFinishRename}
+                  onKeyDown={handleTitleKeyDown}
+                  className="text-sm sm:text-base font-bold text-slate-800 dark:text-slate-100 bg-white dark:bg-slate-800 border border-blue-500 rounded px-1.5 py-0.5 -mx-1.5 outline-none ring-2 ring-blue-500/20 max-w-[200px] sm:max-w-[320px] md:max-w-[400px] shadow-sm"
+                  title="Pressione Enter para salvar ou Esc para cancelar"
+                />
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleStartRename}
+                  className="group flex items-center gap-1.5 text-left text-sm sm:text-base font-bold text-slate-800 dark:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800/80 px-1.5 py-0.5 -mx-1.5 rounded transition-all cursor-pointer max-w-[200px] sm:max-w-[320px] md:max-w-[420px]"
+                  title="Clique para renomear o arquivo"
+                >
+                  <span className="truncate">{currentDoc.title}</span>
+                  <Pencil className="w-3.5 h-3.5 text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
+                </button>
+              )}
+
               {currentDoc.isDirty && (
                 <span className="w-2 h-2 rounded-full bg-amber-500 shrink-0" title="Alterações não salvas" />
               )}
