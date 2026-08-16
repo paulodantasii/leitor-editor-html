@@ -1,5 +1,5 @@
 /**
- * Service to generate and download a portable Markdown file.
+ * Service to generate and download a portable Markdown file or trigger clean PDF printing.
  */
 
 /**
@@ -20,3 +20,22 @@ export function downloadMarkdownFile(content: string, filename: string = 'docume
   document.body.removeChild(link);
   URL.revokeObjectURL(url);
 }
+
+/**
+ * Triggers clean page printing / Save as PDF with optimal document title for file naming.
+ */
+export function printDocument(docTitle: string = 'documento'): void {
+  const cleanTitle = docTitle.replace(/\.(md|markdown|txt)$/i, '').trim() || 'documento';
+  const previousTitle = document.title;
+  
+  // Set clean title so browser PDF export defaults to this filename
+  document.title = cleanTitle;
+
+  window.print();
+
+  // Restore title after print dialog closes
+  setTimeout(() => {
+    document.title = previousTitle;
+  }, 1000);
+}
+

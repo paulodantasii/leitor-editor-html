@@ -50,7 +50,7 @@ export const ReadingProgress: React.FC = () => {
   const timeDisplay = remainingMinutes > 0 ? `${remainingMinutes} min` : 'Fim';
 
   return (
-    <div className="fixed bottom-5 right-5 z-40 bg-white/70 dark:bg-slate-900/70 backdrop-blur-md shadow-sm border border-slate-200 dark:border-slate-800 rounded-xl p-2 min-w-[3.5rem] flex flex-col items-center justify-center transition-all opacity-70 hover:opacity-100 pointer-events-none">
+    <div className="fixed bottom-5 right-5 z-40 bg-white/70 dark:bg-slate-900/70 backdrop-blur-md shadow-sm border border-slate-200 dark:border-slate-800 rounded-xl p-2 min-w-[3.5rem] flex flex-col items-center justify-center transition-all opacity-70 hover:opacity-100 pointer-events-none print:hidden">
       <span className="text-sm font-semibold text-slate-600 dark:text-slate-400 leading-tight">
         {scrollProgress}%
       </span>

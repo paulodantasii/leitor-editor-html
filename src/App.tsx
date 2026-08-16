@@ -9,7 +9,13 @@ import { useAppStore } from './store/useAppStore';
 import { ReadingProgress } from './components/layout/ReadingProgress';
 
 export const App: React.FC = () => {
-  const { preferences, loadCachedDocument, toggleHighlightMode } = useAppStore();
+  const { preferences, document: currentDoc, loadCachedDocument, toggleHighlightMode } = useAppStore();
+
+  // Sync document title in browser tab
+  useEffect(() => {
+    const cleanTitle = currentDoc.title ? currentDoc.title.replace(/\.(md|markdown|txt)$/i, '').trim() : '';
+    document.title = cleanTitle ? `${cleanTitle} - Leitor & Editor MD` : 'Leitor & Editor Markdown PWA';
+  }, [currentDoc.title]);
 
   // Show Welcome screen if opening browser from scratch (sessionStorage empty)
   const [showWelcome, setShowWelcome] = useState<boolean>(() => {

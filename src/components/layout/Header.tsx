@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { useAppStore } from '../../store/useAppStore';
 import { AppearanceMenu } from './AppearanceMenu';
-import { downloadMarkdownFile } from '../../services/exportService';
+import { downloadMarkdownFile, printDocument } from '../../services/exportService';
 import {
   Highlighter,
   Edit3,
@@ -9,6 +9,8 @@ import {
   FolderOpen,
   Save,
   Download,
+  Printer,
+  ChevronDown,
   Cloud,
   Check,
   RefreshCw,
@@ -39,10 +41,27 @@ export const Header: React.FC = () => {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isExportMenuOpen, setIsExportMenuOpen] = useState(false);
+  const exportMenuRef = useRef<HTMLDivElement>(null);
   const [saveSuccessMessage, setSaveSuccessMessage] = useState<string | null>(null);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [editableTitle, setEditableTitle] = useState(currentDoc.title);
   const titleInputRef = useRef<HTMLInputElement>(null);
+
+  // Close Export Dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (exportMenuRef.current && !exportMenuRef.current.contains(event.target as Node)) {
+        setIsExportMenuOpen(false);
+      }
+    };
+    if (isExportMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isExportMenuOpen]);
 
   // Sync editable title when document changes
   useEffect(() => {
@@ -261,8 +280,13 @@ export const Header: React.FC = () => {
     downloadMarkdownFile(currentDoc.content, currentDoc.title || 'documento.md');
   };
 
+  // Print Clean Reader Page / Save as PDF
+  const handlePrint = () => {
+    printDocument(currentDoc.title || 'documento');
+  };
+
   return (
-    <header className="sticky top-0 z-30 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 header-safe-area transition-colors">
+    <header className="sticky top-0 z-30 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 header-safe-area transition-colors print:hidden">
       <div className="max-w-7xl mx-auto flex items-center justify-between gap-2">
         {/* Left Section: Logo & Document Title */}
         <div className="flex items-center gap-3 min-w-0">
@@ -351,7 +375,7 @@ export const Header: React.FC = () => {
             <span className="hidden sm:inline">{isEditable ? 'Edição' : 'Leitura'}</span>
           </button>
 
-          {/* Desktop Actions: Abrir, Salvar, Exportar */}
+          {/* Desktop Actions: Abrir, Salvar, Exportar, Imprimir */}
           <div className="hidden lg:flex items-center gap-1.5 pl-2 border-l border-slate-200 dark:border-slate-800">
             {/* Input Fallback */}
             <input
@@ -388,14 +412,58 @@ export const Header: React.FC = () => {
               <Save className="w-4 h-4 text-emerald-500" /> Salvar
             </button>
 
-            {/* Botão Exportar (Baixar nova cópia) */}
-            <button
-              onClick={handleExportMD}
-              title="Baixar nova cópia Markdown com grifos"
-              className="px-3 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center gap-1.5 text-xs font-medium transition-colors"
-            >
-              <Download className="w-4 h-4 text-purple-500" /> Exportar
-            </button>
+            {/* Dropdown Exportar (MD ou PDF) */}
+            <div className="relative" ref={exportMenuRef}>
+              <button
+                onClick={() => setIsExportMenuOpen(!isExportMenuOpen)}
+                title="Exportar documento (Markdown ou PDF)"
+                className={`px-3 h-8 rounded-xl transition-colors flex items-center gap-1.5 text-xs font-medium ${
+                  isExportMenuOpen
+                    ? 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 shadow-sm'
+                    : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+                }`}
+              >
+                <Download className="w-4 h-4 text-purple-500" />
+                <span>Exportar</span>
+                <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${isExportMenuOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              {isExportMenuOpen && (
+                <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 p-1.5 z-40 space-y-1 animate-in fade-in">
+                  <button
+                    onClick={() => {
+                      handleExportMD();
+                      setIsExportMenuOpen(false);
+                    }}
+                    className="w-full px-2.5 py-2 text-left text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-purple-50 dark:hover:bg-purple-950/40 rounded-lg flex items-center gap-2.5 transition-colors group"
+                  >
+                    <div className="w-7 h-7 rounded-lg bg-purple-100 dark:bg-purple-950/60 flex items-center justify-center text-purple-600 dark:text-purple-400 shrink-0 group-hover:scale-105 transition-transform">
+                      <Download className="w-3.5 h-3.5" />
+                    </div>
+                    <div>
+                      <div className="font-semibold text-slate-800 dark:text-slate-100">Markdown (.md)</div>
+                      <div className="text-[10px] text-slate-400 dark:text-slate-400">Com grifos e anotações</div>
+                    </div>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      handlePrint();
+                      setIsExportMenuOpen(false);
+                    }}
+                    className="w-full px-2.5 py-2 text-left text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-sky-50 dark:hover:bg-sky-950/40 rounded-lg flex items-center gap-2.5 transition-colors group"
+                  >
+                    <div className="w-7 h-7 rounded-lg bg-sky-100 dark:bg-sky-950/60 flex items-center justify-center text-sky-600 dark:text-sky-400 shrink-0 group-hover:scale-105 transition-transform">
+                      <Printer className="w-3.5 h-3.5" />
+                    </div>
+                    <div>
+                      <div className="font-semibold text-slate-800 dark:text-slate-100">Documento PDF (.pdf)</div>
+                      <div className="text-[10px] text-slate-400 dark:text-slate-400">Visual limpo do modo leitor</div>
+                    </div>
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Aparência Menu */}
@@ -431,7 +499,7 @@ export const Header: React.FC = () => {
             </button>
 
             {isMobileMenuOpen && (
-              <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 p-2 z-40 space-y-1 animate-in fade-in">
+              <div className="absolute right-0 mt-2 w-52 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 p-2 z-40 space-y-1 animate-in fade-in">
                 <button
                   onClick={() => {
                     handleNewFile();
@@ -459,15 +527,30 @@ export const Header: React.FC = () => {
                 >
                   <Save className="w-4 h-4 text-emerald-500" /> Salvar
                 </button>
-                <button
-                  onClick={() => {
-                    handleExportMD();
-                    setIsMobileMenuOpen(false);
-                  }}
-                  className="w-full p-2 text-left text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg flex items-center gap-2"
-                >
-                  <Download className="w-4 h-4 text-purple-500" /> Exportar
-                </button>
+
+                <div className="pt-1.5 border-t border-slate-100 dark:border-slate-700/60 mt-1 space-y-1">
+                  <div className="px-2 py-0.5 text-[10px] font-bold uppercase text-slate-400 dark:text-slate-400 tracking-wider">
+                    Exportar
+                  </div>
+                  <button
+                    onClick={() => {
+                      handleExportMD();
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className="w-full p-2 text-left text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg flex items-center gap-2"
+                  >
+                    <Download className="w-4 h-4 text-purple-500" /> Markdown (.md)
+                  </button>
+                  <button
+                    onClick={() => {
+                      handlePrint();
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className="w-full p-2 text-left text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg flex items-center gap-2"
+                  >
+                    <Printer className="w-4 h-4 text-sky-500" /> Documento PDF (.pdf)
+                  </button>
+                </div>
               </div>
             )}
           </div>
@@ -476,3 +559,4 @@ export const Header: React.FC = () => {
     </header>
   );
 };
+

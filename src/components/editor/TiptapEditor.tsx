@@ -405,14 +405,14 @@ export const TiptapEditor: React.FC = () => {
   };
 
   return (
-    <div className="w-full flex flex-col items-center py-4 px-4 sm:px-6">
+    <div className="w-full flex flex-col items-center py-4 px-4 sm:px-6 print:p-0 print:m-0 print:w-full">
       {isEditable && <EditorToolbar editor={editor} />}
 
       <div
         ref={containerRef}
         className={`relative w-full ${getContainerWidthClass()} transition-all duration-200 ${
           preferences.fontFamily === 'serif' ? 'font-serif-editor' : 'font-sans-editor'
-        } ${isHighlightMode ? 'highlight-mode-active' : ''} ${isEditable ? 'editor-mode-active' : ''}`}
+        } ${isHighlightMode ? 'highlight-mode-active' : ''} ${isEditable ? 'editor-mode-active' : ''} print:max-w-none print:w-full print:p-0 print:m-0`}
         style={{ fontSize: `${preferences.fontSize}px` }}
       >
         {editor && (
@@ -430,7 +430,10 @@ export const TiptapEditor: React.FC = () => {
           </BubbleMenu>
         )}
         
-        <EditorContent editor={editor} className="bg-white dark:bg-slate-800/90 shadow-sm border border-slate-200 dark:border-slate-700/60 rounded-xl p-6 sm:p-10 min-h-[75vh]" />
+        <EditorContent 
+          editor={editor} 
+          className="bg-white dark:bg-slate-800/90 shadow-sm border border-slate-200 dark:border-slate-700/60 rounded-xl p-6 sm:p-10 min-h-[75vh] print:shadow-none print:border-none print:p-0 print:min-h-0 print:bg-transparent print:dark:bg-transparent" 
+        />
       </div>
     </div>
   );
