@@ -361,19 +361,40 @@ export const Header: React.FC = () => {
             </span>
           </button>
 
-          {/* Modo Leitura / Edição Toggle */}
-          <button
-            onClick={() => setIsEditable(!isEditable)}
-            className={`px-2.5 sm:px-3 h-8 rounded-xl font-medium text-xs flex items-center gap-1.5 transition-all shrink-0 ${
-              isEditable
-                ? 'bg-blue-600 text-white shadow-sm'
-                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
-            }`}
-            title={isEditable ? 'Alternar para Modo Leitura' : 'Alternar para Modo Edição'}
+          {/* Modo Leitura / Edição Segmented Switch */}
+          <div
+            role="group"
+            aria-label="Modo de visualização"
+            className="h-8 p-0.5 bg-slate-100 dark:bg-slate-800 rounded-xl border border-slate-200/80 dark:border-slate-700/80 flex items-center shrink-0 shadow-inner"
           >
-            {isEditable ? <Edit3 className="w-4 h-4" /> : <BookOpen className="w-4 h-4" />}
-            <span className="hidden sm:inline">{isEditable ? 'Edição' : 'Leitura'}</span>
-          </button>
+            <button
+              type="button"
+              onClick={() => setIsEditable(false)}
+              title="Modo Leitura (focado na leitura e grifos)"
+              className={`h-7 px-2.5 rounded-lg flex items-center gap-1.5 text-xs transition-all duration-200 ${
+                !isEditable
+                  ? 'bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 shadow-sm font-semibold'
+                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 font-medium'
+              }`}
+            >
+              <BookOpen className={`w-3.5 h-3.5 ${!isEditable ? 'text-blue-600 dark:text-blue-400' : 'text-slate-400 dark:text-slate-500'}`} />
+              <span className="hidden sm:inline">Leitura</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setIsEditable(true)}
+              title="Modo Edição (digitação e formatação Markdown)"
+              className={`h-7 px-2.5 rounded-lg flex items-center gap-1.5 text-xs transition-all duration-200 ${
+                isEditable
+                  ? 'bg-blue-600 text-white shadow-sm font-semibold'
+                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 font-medium'
+              }`}
+            >
+              <Edit3 className={`w-3.5 h-3.5 ${isEditable ? 'text-white' : 'text-slate-400 dark:text-slate-500'}`} />
+              <span className="hidden sm:inline">Edição</span>
+            </button>
+          </div>
 
           {/* Desktop Actions: Abrir, Salvar, Exportar */}
           <div className="hidden lg:flex items-center gap-1 sm:gap-1.5 pl-1.5 sm:pl-2 border-l border-slate-200 dark:border-slate-800 shrink-0">
