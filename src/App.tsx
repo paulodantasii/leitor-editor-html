@@ -89,7 +89,7 @@ export const App: React.FC = () => {
 
   return (
     <div
-      className="min-h-screen flex flex-col transition-colors"
+      className="min-h-screen flex flex-col transition-colors print:bg-transparent print:text-slate-900"
       style={{ backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }}
     >
       <Header />

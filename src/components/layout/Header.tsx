@@ -287,15 +287,15 @@ export const Header: React.FC = () => {
 
   return (
     <header className="sticky top-0 z-30 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 header-safe-area transition-colors print:hidden">
-      <div className="max-w-7xl mx-auto flex items-center justify-between gap-2">
+      <div className="max-w-7xl mx-auto flex items-center justify-between gap-2 sm:gap-4">
         {/* Left Section: Logo & Document Title */}
-        <div className="flex items-center gap-3 min-w-0">
+        <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1 max-w-full">
           <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 text-white flex items-center justify-center shadow-md shrink-0">
             <Highlighter className="w-5 h-5" />
           </div>
 
-          <div className="min-w-0">
-            <div className="flex items-center gap-2">
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2 min-w-0">
               {isEditingTitle ? (
                 <input
                   ref={titleInputRef}
@@ -304,14 +304,14 @@ export const Header: React.FC = () => {
                   onChange={(e) => setEditableTitle(e.target.value)}
                   onBlur={handleFinishRename}
                   onKeyDown={handleTitleKeyDown}
-                  className="text-sm sm:text-base font-bold text-slate-800 dark:text-slate-100 bg-white dark:bg-slate-800 border border-blue-500 rounded px-1.5 py-0.5 -mx-1.5 outline-none ring-2 ring-blue-500/20 max-w-[200px] sm:max-w-[320px] md:max-w-[400px] shadow-sm"
+                  className="text-sm sm:text-base font-bold text-slate-800 dark:text-slate-100 bg-white dark:bg-slate-800 border border-blue-500 rounded px-1.5 py-0.5 -mx-1.5 outline-none ring-2 ring-blue-500/20 w-full min-w-0 max-w-[140px] sm:max-w-[240px] md:max-w-[320px] lg:max-w-[380px] xl:max-w-[480px] shadow-sm"
                   title="Pressione Enter para salvar ou Esc para cancelar"
                 />
               ) : (
                 <button
                   type="button"
                   onClick={handleStartRename}
-                  className="group flex items-center gap-1.5 text-left text-sm sm:text-base font-bold text-slate-800 dark:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800/80 px-1.5 py-0.5 -mx-1.5 rounded transition-all cursor-pointer max-w-[200px] sm:max-w-[320px] md:max-w-[420px]"
+                  className="group flex items-center gap-1.5 text-left text-sm sm:text-base font-bold text-slate-800 dark:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800/80 px-1.5 py-0.5 -mx-1.5 rounded transition-all cursor-pointer min-w-0 max-w-[140px] sm:max-w-[240px] md:max-w-[320px] lg:max-w-[380px] xl:max-w-[480px]"
                   title="Clique para renomear o arquivo"
                 >
                   <span className="truncate">{currentDoc.title}</span>
@@ -323,12 +323,12 @@ export const Header: React.FC = () => {
                 <span className="w-2 h-2 rounded-full bg-amber-500 shrink-0" title="Alterações não salvas" />
               )}
               {saveSuccessMessage && (
-                <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 px-2 py-0.5 rounded-full animate-in fade-in">
+                <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 px-2 py-0.5 rounded-full animate-in fade-in shrink-0">
                   ✓ {saveSuccessMessage}
                 </span>
               )}
             </div>
-            <p className="text-[11px] text-slate-400 dark:text-slate-500 hidden sm:block">
+            <p className="text-[11px] text-slate-400 dark:text-slate-500 hidden sm:block truncate whitespace-nowrap">
               {fileHandle
                 ? 'Arquivo local conectado (Salvar direto)'
                 : currentDoc.oneDriveItemId
@@ -339,11 +339,11 @@ export const Header: React.FC = () => {
         </div>
 
         {/* Center/Right Section: Actions Toolbar */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
           {/* Modo Grifar (Toggle Button + Badge) */}
           <button
             onClick={toggleHighlightMode}
-            className={`px-3 h-8 rounded-xl font-medium text-xs flex items-center gap-1.5 transition-all ${
+            className={`px-2.5 sm:px-3 h-8 rounded-xl font-medium text-xs flex items-center gap-1.5 transition-all shrink-0 ${
               isHighlightMode
                 ? 'bg-amber-500 text-white shadow-sm font-semibold'
                 : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
@@ -364,7 +364,7 @@ export const Header: React.FC = () => {
           {/* Modo Leitura / Edição Toggle */}
           <button
             onClick={() => setIsEditable(!isEditable)}
-            className={`px-3 h-8 rounded-xl font-medium text-xs flex items-center gap-1.5 transition-all ${
+            className={`px-2.5 sm:px-3 h-8 rounded-xl font-medium text-xs flex items-center gap-1.5 transition-all shrink-0 ${
               isEditable
                 ? 'bg-blue-600 text-white shadow-sm'
                 : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
@@ -375,8 +375,8 @@ export const Header: React.FC = () => {
             <span className="hidden sm:inline">{isEditable ? 'Edição' : 'Leitura'}</span>
           </button>
 
-          {/* Desktop Actions: Abrir, Salvar, Exportar, Imprimir */}
-          <div className="hidden lg:flex items-center gap-1.5 pl-2 border-l border-slate-200 dark:border-slate-800">
+          {/* Desktop Actions: Abrir, Salvar, Exportar */}
+          <div className="hidden lg:flex items-center gap-1 sm:gap-1.5 pl-1.5 sm:pl-2 border-l border-slate-200 dark:border-slate-800 shrink-0">
             {/* Input Fallback */}
             <input
               ref={fileInputRef}
@@ -390,34 +390,38 @@ export const Header: React.FC = () => {
             <button
               onClick={handleNewFile}
               title="Iniciar novo arquivo em branco"
-              className="px-3 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center gap-1.5 text-xs font-medium transition-colors"
+              className="px-2.5 sm:px-3 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center gap-1.5 text-xs font-medium transition-colors shrink-0"
             >
-              <FilePlus className="w-4 h-4 text-purple-500" /> Novo
+              <FilePlus className="w-4 h-4 text-purple-500" />
+              <span className="hidden xl:inline">Novo</span>
             </button>
 
             {/* Botão Abrir */}
             <button
               onClick={handleOpenFile}
               title="Abrir arquivo Markdown local"
-              className="px-3 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center gap-1.5 text-xs font-medium transition-colors"
+              className="px-2.5 sm:px-3 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center gap-1.5 text-xs font-medium transition-colors shrink-0"
             >
-              <FolderOpen className="w-4 h-4 text-blue-500" /> Abrir
+              <FolderOpen className="w-4 h-4 text-blue-500" />
+              <span className="hidden xl:inline">Abrir</span>
             </button>
 
+            {/* Botão Salvar */}
             <button
               onClick={handleSaveFile}
               title="Salvar alterações substituindo o arquivo original (Ctrl+S)"
-              className="px-3 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center gap-1.5 text-xs font-medium transition-colors"
+              className="px-2.5 sm:px-3 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center gap-1.5 text-xs font-medium transition-colors shrink-0"
             >
-              <Save className="w-4 h-4 text-emerald-500" /> Salvar
+              <Save className="w-4 h-4 text-emerald-500" />
+              <span className="hidden xl:inline">Salvar</span>
             </button>
 
-            {/* Dropdown Exportar (MD ou PDF) */}
-            <div className="relative" ref={exportMenuRef}>
+            {/* Dropdown Exportar */}
+            <div className="relative shrink-0" ref={exportMenuRef}>
               <button
                 onClick={() => setIsExportMenuOpen(!isExportMenuOpen)}
                 title="Exportar documento (Markdown ou PDF)"
-                className={`px-3 h-8 rounded-xl transition-colors flex items-center gap-1.5 text-xs font-medium ${
+                className={`px-2.5 sm:px-3 h-8 rounded-xl transition-colors flex items-center gap-1.5 text-xs font-medium shrink-0 ${
                   isExportMenuOpen
                     ? 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 shadow-sm'
                     : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
@@ -429,7 +433,7 @@ export const Header: React.FC = () => {
               </button>
 
               {isExportMenuOpen && (
-                <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 p-1.5 z-40 space-y-1 animate-in fade-in">
+                <div className="absolute right-0 mt-2 w-44 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 p-1.5 z-40 space-y-1 animate-in fade-in">
                   <button
                     onClick={() => {
                       handleExportMD();
@@ -440,10 +444,7 @@ export const Header: React.FC = () => {
                     <div className="w-7 h-7 rounded-lg bg-purple-100 dark:bg-purple-950/60 flex items-center justify-center text-purple-600 dark:text-purple-400 shrink-0 group-hover:scale-105 transition-transform">
                       <Download className="w-3.5 h-3.5" />
                     </div>
-                    <div>
-                      <div className="font-semibold text-slate-800 dark:text-slate-100">Markdown (.md)</div>
-                      <div className="text-[10px] text-slate-400 dark:text-slate-400">Com grifos e anotações</div>
-                    </div>
+                    <span className="font-semibold text-slate-800 dark:text-slate-100">Markdown</span>
                   </button>
 
                   <button
@@ -456,10 +457,7 @@ export const Header: React.FC = () => {
                     <div className="w-7 h-7 rounded-lg bg-sky-100 dark:bg-sky-950/60 flex items-center justify-center text-sky-600 dark:text-sky-400 shrink-0 group-hover:scale-105 transition-transform">
                       <Printer className="w-3.5 h-3.5" />
                     </div>
-                    <div>
-                      <div className="font-semibold text-slate-800 dark:text-slate-100">Documento PDF (.pdf)</div>
-                      <div className="text-[10px] text-slate-400 dark:text-slate-400">Visual limpo do modo leitor</div>
-                    </div>
+                    <span className="font-semibold text-slate-800 dark:text-slate-100">PDF</span>
                   </button>
                 </div>
               )}
@@ -472,7 +470,7 @@ export const Header: React.FC = () => {
           {/* OneDrive Sync Button */}
           <button
             onClick={() => setIsOneDriveModalOpen(true)}
-            className="px-3 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center gap-1.5 text-xs font-medium transition-colors"
+            className="px-2.5 sm:px-3 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center gap-1.5 text-xs font-medium transition-colors shrink-0"
           >
             <Cloud className="w-4 h-4 text-blue-500" />
             <span className="hidden sm:inline">
@@ -539,7 +537,7 @@ export const Header: React.FC = () => {
                     }}
                     className="w-full p-2 text-left text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg flex items-center gap-2"
                   >
-                    <Download className="w-4 h-4 text-purple-500" /> Markdown (.md)
+                    <Download className="w-4 h-4 text-purple-500" /> Markdown
                   </button>
                   <button
                     onClick={() => {
@@ -548,7 +546,7 @@ export const Header: React.FC = () => {
                     }}
                     className="w-full p-2 text-left text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg flex items-center gap-2"
                   >
-                    <Printer className="w-4 h-4 text-sky-500" /> Documento PDF (.pdf)
+                    <Printer className="w-4 h-4 text-sky-500" /> PDF
                   </button>
                 </div>
               </div>

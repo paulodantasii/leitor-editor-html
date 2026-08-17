@@ -47,14 +47,14 @@ export const AppearanceMenu: React.FC = () => {
       <button
         onClick={() => setIsOpen(!isOpen)}
         title="Aparência e Tipografia"
-        className={`px-3 h-8 rounded-xl transition-colors flex items-center gap-1.5 text-xs font-medium ${
+        className={`px-2.5 sm:px-3 h-8 rounded-xl transition-colors flex items-center gap-1.5 text-xs font-medium shrink-0 ${
           isOpen
             ? 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
             : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
         }`}
       >
-        <Sliders className="w-5 h-5" />
-        <span className="hidden sm:inline">Aparência</span>
+        <Sliders className="w-4 h-4" />
+        <span className="hidden md:inline">Aparência</span>
       </button>
 
       {isOpen && (

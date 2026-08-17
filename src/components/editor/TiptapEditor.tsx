@@ -230,10 +230,20 @@ export const TiptapEditor: React.FC = () => {
     };
   }, [editor, isHighlightMode, isEditable, updateHighlightCount, setPopoverOpen]);
 
+  // Ref to debounce touch and mouse events on mobile/iPad
+  const lastPointerDownTimeRef = useRef(0);
+
   // Handle click on marks (activate popover) vs click outside marks (deactivate popover)
   useEffect(() => {
     const handlePointerDown = (e: MouseEvent | TouchEvent) => {
       if (!editor || editor.isDestroyed || isEditable) return;
+
+      const now = Date.now();
+      if (e.type === 'touchstart') {
+        lastPointerDownTimeRef.current = now;
+      } else if (e.type === 'mousedown' && now - lastPointerDownTimeRef.current < 400) {
+        return;
+      }
 
       const target = e.target as HTMLElement;
       if (!target) return;
@@ -250,6 +260,38 @@ export const TiptapEditor: React.FC = () => {
           const textNode = markEl.firstChild || markEl;
           const pos = editor.view.posAtDOM(textNode, 0);
           if (pos >= 0 && pos < editor.state.doc.content.size) {
+            const clickedId = markEl.getAttribute('data-id');
+            const currentActiveId = editor.getAttributes('customHighlight').id;
+            const currentSel = editor.state.selection;
+
+            // Check if the popover is already open for this exact highlight mark:
+            const isSameMark =
+              isPopoverOpenRef.current &&
+              ((clickedId && currentActiveId && clickedId === currentActiveId) ||
+                (!clickedId && !currentActiveId && pos >= currentSel.from - 2 && pos <= currentSel.to + 2 && editor.isActive('customHighlight')));
+
+            if (isSameMark) {
+              // 2nd click: close the popover and clear mark selection
+              setPopoverOpen(false);
+              let clearPos = -1;
+              editor.state.doc.descendants((node, p) => {
+                if (clearPos !== -1) return false;
+                if (node.isText && !node.marks.some((m) => m.type.name === 'customHighlight')) {
+                  clearPos = p;
+                  return false;
+                }
+              });
+
+              if (clearPos >= 0) {
+                editor.commands.setTextSelection(clearPos);
+              } else {
+                editor.commands.setTextSelection(0);
+              }
+              window.getSelection()?.removeAllRanges();
+              return;
+            }
+
+            // 1st click (or 3rd click after closing): Open color popover
             setPopoverOpen(true);
             editor.commands.setTextSelection(pos + 1);
             return;
