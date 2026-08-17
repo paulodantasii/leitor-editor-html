@@ -41,6 +41,7 @@ export const Header: React.FC = () => {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const mobileMenuRef = useRef<HTMLDivElement>(null);
   const [isExportMenuOpen, setIsExportMenuOpen] = useState(false);
   const exportMenuRef = useRef<HTMLDivElement>(null);
   const [saveSuccessMessage, setSaveSuccessMessage] = useState<string | null>(null);
@@ -48,20 +49,23 @@ export const Header: React.FC = () => {
   const [editableTitle, setEditableTitle] = useState(currentDoc.title);
   const titleInputRef = useRef<HTMLInputElement>(null);
 
-  // Close Export Dropdown when clicking outside
+  // Close Export & Mobile Dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (exportMenuRef.current && !exportMenuRef.current.contains(event.target as Node)) {
         setIsExportMenuOpen(false);
       }
+      if (mobileMenuRef.current && !mobileMenuRef.current.contains(event.target as Node)) {
+        setIsMobileMenuOpen(false);
+      }
     };
-    if (isExportMenuOpen) {
+    if (isExportMenuOpen || isMobileMenuOpen) {
       document.addEventListener('mousedown', handleClickOutside);
     }
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [isExportMenuOpen]);
+  }, [isExportMenuOpen, isMobileMenuOpen]);
 
   // Sync editable title when document changes
   useEffect(() => {
@@ -505,16 +509,17 @@ export const Header: React.FC = () => {
           </button>
 
           {/* Mobile Overflow Menu */}
-          <div className="relative lg:hidden">
+          <div className="relative lg:hidden shrink-0 flex items-center" ref={mobileMenuRef}>
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className={`px-2 h-8 rounded-xl transition-colors ${
+              title="Mais opções"
+              className={`w-8 h-8 rounded-xl flex items-center justify-center transition-colors shrink-0 ${
                 isMobileMenuOpen
-                  ? 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
+                  ? 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200'
                   : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
               }`}
             >
-              <MoreVertical className="w-5 h-5" />
+              <MoreVertical className="w-4 h-4" />
             </button>
 
             {isMobileMenuOpen && (

@@ -234,7 +234,7 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({ editor }) => {
               onClick={() => setIsHighlightMenuOpen((prev) => !prev)}
               className={`p-1.5 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors flex items-center gap-0.5 relative ${
                 isCustomHighlightActive || isHighlightMenuOpen
-                  ? 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 font-bold'
+                  ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400'
                   : ''
               }`}
               title="Cor de Destaque / Grifar"
